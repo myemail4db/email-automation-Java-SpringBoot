@@ -1,8 +1,33 @@
 HELP.md
+
+# macOS
+.DS_Store
+
+# Maven / Spring Boot
 target/
-.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+# Logs
+logs/
+*.log
+
+# Generated runtime directories
+input/
+processed_review/
+jobs_to_review/
+sent_archive/
+error/
+
+# Generated archives
+*.zip
+
+# OAuth / secrets — never commit these
+.env
+credentials.json
+tokens/
+token.json
+*.secret.json
 
 ### STS ###
 .apt_generated
@@ -34,4 +59,6 @@ build/
 
 ### Postman ###
 .postman/
-*.postman_environment.json 
+*.postman_environment.json
+postman/*local*
+postman/*secret*
