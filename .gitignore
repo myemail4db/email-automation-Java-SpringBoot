@@ -18,6 +18,8 @@ processed_review/
 jobs_to_review/
 sent_archive/
 error/
+ready_to_send/
+send_archive/
 
 # Generated archives
 *.zip
