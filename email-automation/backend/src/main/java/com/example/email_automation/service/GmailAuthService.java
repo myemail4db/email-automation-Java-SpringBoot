@@ -16,6 +16,7 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
 
 /** 
@@ -35,6 +36,12 @@ public class GmailAuthService {
     private static Credential getCredentials() throws Exception {
         // load client secrets from credentials.json
         InputStream in = GmailAuthService.class.getResourceAsStream("/credentials.json");
+
+        if (in == null) {
+            throw new Exception("Resource not found: /credentials.json. " +
+                "Ensure the file is located in the config directory.");
+        }
+
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
         
         // Build flow and trigger user authorization request
@@ -44,7 +51,21 @@ public class GmailAuthService {
             .setAccessType("offline")
             .build();
 
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(888).build();
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+    }
+
+    public Gmail getGmailClient() throws Exception{
+     
+        // call getCredentials
+        Credential credentials = getCredentials();
+
+        // build Gmail client and return the Gmail client()
+        return new Gmail.Builder(
+                GoogleNetHttpTransport.newTrustedTransport(),
+                JSON_FACTORY,
+                credentials)
+            .setApplicationName(APPLICATION_NAME)
+            .build();
     }
 }
