@@ -15,13 +15,10 @@ public class EmailController {
         this.emailExportService = emailExportService;
     }
 
-    @RequestMapping("/api/health")
-    public String healthCheck() {
-        return "Email Automation API is running";
+    // future: list, preview, fetch, labels
+    @RequestMapping("/api/emails")
+    public String getEmails(@RequestParam String format) {
+        return "For future implementation: list, preview, fetch, labels. Currently exporting emails in format: " + format;
     }
 
-    @RequestMapping("/api/export")
-    public String getEmails(@RequestParam String format) {
-        return emailExportService.exportEmails(format);
-    }
 }
