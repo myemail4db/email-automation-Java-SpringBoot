@@ -39,22 +39,33 @@ public class EmailBodyExtractorService {
 
         // Recursively search for the body data in the message parts
         try {
-            String rawMessage = findBodyData(message.getPayload());
+            String[] mimeType = {"text/plain", "text/html"};
 
-            if (rawMessage == null || rawMessage.isBlank()) {
-                return "";
+            // Search for the body data in the message parts based on the specified MIME types
+            for (int i = 0; i < 2; i++) {
+            
+                // Search for the body data in the message parts based on the specified MIME types
+                String rawMessage = findBodyDataByMimeType(message.getPayload(), mimeType[i]);
+
+                // If body data is found, decode it and return the email body
+                if (rawMessage != null && !rawMessage.isBlank()) {
+
+                    // Decode the Base64-encoded email body
+                    byte[] decodedBytes = Base64.getUrlDecoder().decode(rawMessage);
+
+                    // Convert the decoded bytes to a UTF-8 string
+                    return new String(decodedBytes, StandardCharsets.UTF_8);
+
+                }
             }
-
-            // Decode the Base64-encoded email body
-            byte[] decodedBytes = Base64.getUrlDecoder().decode(rawMessage);
-
-            // Convert the decoded bytes to a UTF-8 string
-            return new String(decodedBytes, StandardCharsets.UTF_8);
-
         } catch (Exception e) {
+
             System.out.println("Error extracting email body: " + e.getMessage());
             return "";
+            
         }
+
+        return "";
     }
 
     private String findBodyData(MessagePart part) {
