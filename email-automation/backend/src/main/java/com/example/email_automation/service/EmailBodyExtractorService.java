@@ -68,36 +68,6 @@ public class EmailBodyExtractorService {
         return "";
     }
 
-    private String findBodyData(MessagePart part) {
-        if (part == null) {
-            return null;
-        }
-
-        // Check if this part has the body data
-        if (part.getBody() != null && part.getBody().getData() != null) {
-
-            // Return the body data if found
-            return part.getBody().getData();
-        }
-
-        // If not, recursively check the child parts
-        if (part.getParts() != null) {
-
-            // Recursively search for body data in child parts
-            for (MessagePart childPart : part.getParts()) {
-
-                // Recursively search for body data in child parts
-                String data = findBodyData(childPart);
-
-                if (data != null) {
-                    return data;
-                }
-            }
-        }
-
-        return null;
-    }
-
     public String extractEmailSubject(Message message) {
         if (message == null || message.getPayload() == null || message.getPayload().getHeaders() == null) {
             return "";
