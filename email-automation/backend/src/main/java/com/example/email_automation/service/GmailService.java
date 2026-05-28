@@ -1,14 +1,15 @@
 package com.example.email_automation.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.google.api.services.gmail.Gmail;
-import com.google.api.services.gmail.model.Profile;
 import com.google.api.services.gmail.model.Message;
+import com.google.api.services.gmail.model.Profile;
 
 /**
  * This service gets the raw emails from Gmail
