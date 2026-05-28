@@ -91,6 +91,11 @@
 			<artifactId>google-oauth-client-jetty</artifactId>
 			<version>1.34.1</version> <!-- Use latest version -->
 		</dependency>
+		<!-- JavaMail API (Jakarta Mail) -->
+		<dependency>
+			<groupId>jakarta.mail</groupId>
+			<artifactId>jakarta.mail-api</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
