@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.example.email_automation.model.EmailMessage;
 import com.google.api.services.gmail.model.Message;
 
 /**
@@ -41,15 +42,9 @@ public class EmailExportService {
             System.out.println("Found " + emails.size() + " Gmail emails for text export");
 
             return emails.stream()
-                    .map(emailBodyExtractorService::extractEmailMessage)
-                    .map(email -> {
-                        String cleanedBody = textFilterService.clean(email.getBody());
-
-                        return "Subject: " + email.getSubject() + "\n" +
-                                "From: " + email.getFrom() + "\n" +
-                                "Received: " + email.getReceivedDate() + "\n" +
-                                "Body:\n" + cleanedBody;
-                    })
+                    .map(emailBodyExtractorService::extractEmailMessage)       // Extract email message details
+                    .map(this::cleanEmailBody)                                 // Clean the email body using TextFilterService
+                    .map(emailBodyExtractorService::formatEmailForTextExport)  // Format the email for text export
                     .collect(Collectors.joining("\n\n==============================\n\n"));
         }
 
@@ -59,4 +54,16 @@ public class EmailExportService {
 
         return "Invalid format. Use text or word.";
     }
+
+    private EmailMessage cleanEmailBody(EmailMessage email) {
+        String cleanedBody = textFilterService.clean(email.getBody());
+
+        return new EmailMessage(
+                email.getSubject(),
+                email.getFrom(),
+                cleanedBody,
+                email.getReceivedDate()
+        );
+    }
+
 }
