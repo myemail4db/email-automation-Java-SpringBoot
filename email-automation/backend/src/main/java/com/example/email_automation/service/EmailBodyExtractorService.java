@@ -1,8 +1,13 @@
 package com.example.email_automation.service;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Base64;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.stereotype.Service;
 
@@ -125,10 +130,12 @@ public class EmailBodyExtractorService {
 
         // Search for the "Date" header in the message headers
         for (MessagePartHeader header : headers) {
+
             // Check if the header name is "Date" (case-insensitive)
             if ("date".equalsIgnoreCase(header.getName())) {
-                // If found, return the header value as the email received date
-                receivedDate = header.getValue();
+
+                // If found, normalize the date and return it as the email received date
+                receivedDate = normalizeReceivedDate(header.getValue());
                 break;
             }
         }
@@ -168,4 +175,49 @@ public class EmailBodyExtractorService {
         return null;
     }
 
+    public String formatEmailForTextExport(EmailMessage email) {
+        return "Subject: " + email.getSubject() + "\n" +
+               "From: " + email.getFrom() + "\n" +
+               "Received Date: " + email.getReceivedDate() + "\n\n" +
+               email.getBody();
+    }
+
+    public String normalizeReceivedDate(String receivedDate) {
+        if (receivedDate == null) {
+            return null;
+        }
+        
+        /**
+         * Gmail Date header
+         * → RFC email date format
+         * → parse with RFC_1123_DATE_TIME
+         * → convert to ZoneId.systemDefault()
+         * → format for output
+         */
+
+        try {
+            // 1. Need to remove the (UTC) part from the date string for parsing
+            receivedDate = receivedDate.replaceAll("\\s*\\(.*?\\)\\s*", "");
+
+            // 2. Formatter for the input (Note: Locale.ENGLISH is important for parsing "Mon", "May")
+            DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
+
+            // 3. Parse String -> ZonedDateTime -> LocalDateTime
+            ZonedDateTime zonedDateTime = ZonedDateTime.parse(receivedDate, inputFormatter);
+            LocalDateTime localDateTime = zonedDateTime.toLocalDateTime();
+            
+            System.out.println("LocalDateTime: " + localDateTime);
+
+            // 4. Convert LocalDateTime back to a different String format
+            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("EEE, d MMM yyyy HH:mm:ss a", Locale.ENGLISH);
+            String formattedDate = localDateTime.format(outputFormatter);
+            
+            System.out.println("Formatted Date: " + formattedDate);
+            return formattedDate;
+        } catch (DateTimeParseException e) {
+            System.err.println("Failed to parse the date: " + e.getMessage());
+        }
+
+        return null;
+    }
 }
