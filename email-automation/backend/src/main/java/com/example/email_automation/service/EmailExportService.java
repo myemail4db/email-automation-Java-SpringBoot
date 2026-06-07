@@ -35,17 +35,26 @@ public class EmailExportService {
             return "Format parameter is required. Use text or word.";
         }
 
+        FileExportService fileExportService = new FileExportService();
+
         if (format.equalsIgnoreCase("text")) {
 
             List<Message> emails = gmailService.getRecentEmails();
 
             System.out.println("Found " + emails.size() + " Gmail emails for text export");
 
-            return emails.stream()
+            // Handle case when there are no emails to export
+            if (emails.isEmpty() || emails.get(0) == null) {
+                return "No emails found to export.";
+            }
+
+            String exportedContent = emails.stream()
                     .map(emailBodyExtractorService::extractEmailMessage)       // Extract email message details
                     .map(this::cleanEmailBody)                                 // Clean the email body using TextFilterService
-                    .map(emailBodyExtractorService::formatEmailForTextExport)  // Format the email for text export
+                    .map(email -> fileExportService.saveFile(email, format))
                     .collect(Collectors.joining("\n\n==============================\n\n"));
+           
+            return "Email has been exported in text format. Exported content:\n\n" + exportedContent;
         }
 
         if (format.equalsIgnoreCase("word")) {
