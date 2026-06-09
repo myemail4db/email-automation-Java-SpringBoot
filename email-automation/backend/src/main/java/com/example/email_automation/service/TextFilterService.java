@@ -4,22 +4,84 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 /**
- * This service cleans the raw email
+ *  The Text Cleaning process involves:
+ * 
+ *  1. Making line breaks consistent for Windows, Mac, and Linux.
+ *  2. Removing reply markers that indicate the start of a quoted email thread.
+ *  3. Removing noise lines that are common in email replies but don't necessarily indicate the start of a thread, such as "From:", "Sent:", "To:", "Subject:", etc.
+ *  4. Remove multi-line blocks such as legal disclaimers or survey requests.
+ *  5. Stripping out non-printable characters that may cause issues in text processing or exporting.
+ *  6. Removing unnecessary whitespace and blank lines to improve readability.
+ *  7. Trimming leading and trailing whitespace from the email body to ensure there are no unnecessary spaces at the beginning or end of the content.
+ * 
  */
 
 @Service
 public class TextFilterService {
 
-    private static final List<Pattern> REPLY_MARKER_PATTERNS = List.of(
-            Pattern.compile("^On .+ wrote:\\s*$", Pattern.CASE_INSENSITIVE)
-    );
+    public String clean(String body) {
 
-    private static final List<Pattern> NOISE_LINE_PATTERNS = List.of(
+        if (body == null || body.isEmpty()) {
+            return "";
+        }
+
+        // 1. Normalize line breaks consistent for Windows, Mac, and Linux
+        body = body.replaceAll("\\r\\n", "\\n") // Handle Windows-style line breaks
+                   .replaceAll("\\r", "\\n");   // Handle old Mac-style line breaks
+
+        // 2. Remove Reply Markers like "On [date], [name] wrote:" and similar patterns, 
+        body = removeReplyMarkers(body);
+
+        // 3. Remove Noise Lines such as "From:", "Sent:", "To:", "Subject:", etc.
+        body = removeNoiseLines(body);
+
+        // 4. Remove multi-line blocks to remove, such as legal disclaimers or survey requests.
+        body = removeMultiLineBlocks(body);
+
+        // 5. Strip out non-printable characters that may cause issues in text processing or exporting.
+        // Strips 0-8, 11-12, and 14-31, bypassing 9 (\t), 10 (\n), and 13 (\r)
+        body = body.replaceAll("[\u0000-\u0008\u000B\u000C\u000E-\u001F]", "");
+
+        // 6. Consolidate multiple consecutive blank lines into a single blank line to improve readability.
+        body = body.replaceAll("(?m)(^\\s*$\\n){2,}", "\\n"); 
+
+        // 7. Remove leading and trailing whitespace
+        body = body.trim(); 
+
+        return body;
+    }
+
+    private String removeMultiLineBlocks(String body) {
+
+        // Multi-line blocks to remove, such as legal disclaimers or survey requests.
+        List<Pattern> BLOCK_PATTERNS = Arrays.asList(
+                Pattern.compile("CONFIDENTIALITY NOTICE:.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("How am I doing\\?.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("(CCPA|CCCPA)\\s+Privacy Notice.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("All qualified applicants will receive consideration for employment.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("To unsubscribe.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("unsubscribe.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("(equal opportunity employer|reasonable accommodation|protected veteran|characteristic protected by law).*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("(confidentiality notice|privileged and confidential information).*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("(privacy notice|email confidentiality and privacy).*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("Confidentiality Notice:.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("The information contained in this message may be privileged and confidential and protected from disclosure.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE)
+        );
+        // Remove multi-line blocks to remove, such as legal disclaimers or survey requests.
+        for (Pattern blockPattern : BLOCK_PATTERNS) {
+            body = blockPattern.matcher(body).replaceAll("");
+        }
+        return body;
+    }
+
+    private String removeNoiseLines(String body) {
+
+        // Lines that are common in email replies but don't necessarily indicate the start of a thread, such as "From:", "Sent:", "To:", "Subject:", etc.
+        List<Pattern> NOISE_LINE_PATTERNS = Arrays.asList(
             Pattern.compile("^Sent from Yahoo Mail.*$", Pattern.CASE_INSENSITIVE),
             Pattern.compile("^Get Outlook for .*?$", Pattern.CASE_INSENSITIVE),
             Pattern.compile("^CAUTION:.*$", Pattern.CASE_INSENSITIVE),
@@ -38,101 +100,54 @@ public class TextFilterService {
             Pattern.compile("^External Email.*$", Pattern.CASE_INSENSITIVE),
             Pattern.compile("^Need help\\?\\s*Click for assistance\\s*$", Pattern.CASE_INSENSITIVE),
             Pattern.compile("^Confidentiality Notice:\\s*$", Pattern.CASE_INSENSITIVE)
-    );
+        );
 
-    private static final List<Pattern> BLOCK_PATTERNS = List.of(
-            Pattern.compile("CONFIDENTIALITY NOTICE:.*?(?=\\n\\n|\\z)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL),
-            Pattern.compile("How am I doing\\?.*?(?=\\n\\n|\\z)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL),
-            Pattern.compile("(CCPA|CCCPA)\\s+Privacy Notice.*?(?=\\n\\n|\\z)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL),
-            Pattern.compile("All qualified applicants will receive consideration for employment.*?(?=\\n\\n|\\z)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL),
-            Pattern.compile("To unsubscribe.*?(?=\\n\\n|\\z)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL),
-            Pattern.compile("unsubscribe.*?(?=\\n\\n|\\z)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL),
-            Pattern.compile("(equal opportunity employer|reasonable accommodation|protected veteran|characteristic protected by law).*?(?=\\n\\n|\\z)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL),
-            Pattern.compile("(confidentiality notice|privileged and confidential information).*?(?=\\n\\n|\\z)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL),
-            Pattern.compile("(privacy notice|email confidentiality and privacy).*?(?=\\n\\n|\\z)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL),
-            Pattern.compile("The information contained in this message may be privileged and confidential and protected from disclosure.*?(?=\\n\\n|\\z)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
-    );
-
-    public String clean(String body) {
-        if (body == null || body.isBlank()) {
-            return "";
+        // Remove noise lines, such as "From:", "Sent:", "To:", "Subject:", etc.
+        for (Pattern noiseLinePattern : NOISE_LINE_PATTERNS) {
+            body = noiseLinePattern.matcher(body).replaceAll("");
         }
+        return body;
+    }
 
-        String text = body
-                .replace("&nbsp;", " ")
-                .replace("\r\n", "\n")
-                .replace("\r", "\n");
+    // Remove the On_DATE_PATTERN followed by WROTE_PATTERN,
+    // looping through lines to handle cases where there are multiple reply markers in the email body.
+    private String removeReplyMarkers(String body) {
 
-        text = removePrivateUnicode(text);
+        // Patterns to identify single-line and two-line email reply markers.
+        Pattern REPLY_MARKER_PATTERN = Pattern.compile("^On .+ wrote:\\s*$", Pattern.CASE_INSENSITIVE);
+        Pattern ON_DATE_PATTERN = Pattern.compile("^On\\s.+$", Pattern.CASE_INSENSITIVE);
+        Pattern WROTE_PATTERN = Pattern.compile("^wrote:\\s*$", Pattern.CASE_INSENSITIVE);
 
+        int i = 0;
+
+        List<String> lines = Arrays.asList(body.split("\\n"));
         List<String> cleanedLines = new ArrayList<>();
 
-        for (String line : text.split("\n")) {
-            String stripped = line.trim();
+        // Loop through lines and skip reply markers
+        while (i < lines.size()) {
 
-            if (matchesAny(stripped, REPLY_MARKER_PATTERNS)) {
-                continue;
+            // Check for reply markers like "On [date], [name] wrote:"
+
+            if (i + 1 <= lines.size() - 1 &&
+
+                ON_DATE_PATTERN.matcher(lines.get(i)).find() && WROTE_PATTERN.matcher(lines.get(i + 1)).find()) {
+                i += 2; // Skip the "On [date]" line and the following "wrote:" line
+    
+            } else if (REPLY_MARKER_PATTERN.matcher(lines.get(i)).find()) {
+    
+                i++; // Skip the "On [date]" followed by "wrote:"
+    
+            } else {
+    
+                cleanedLines.add(lines.get(i));
+                i++;
+
             }
-
-            if (matchesAny(stripped, NOISE_LINE_PATTERNS)) {
-                continue;
-            }
-
-            cleanedLines.add(line);
         }
-
-        text = String.join("\n", cleanedLines);
-        text = collapseBlankLines(text);
-
-        for (Pattern pattern : BLOCK_PATTERNS) {
-            text = pattern.matcher(text).replaceAll("");
-        }
-
-        text = normalizeLines(text);
-        text = text.replaceAll("\\n\\s*-\\s*", "\n- ");
-        text = collapseBlankLines(text);
-
-        return text.trim();
-    }
-
-    private boolean matchesAny(String text, List<Pattern> patterns) {
-        return patterns.stream().anyMatch(pattern -> pattern.matcher(text).matches());
-    }
-
-    private String removePrivateUnicode(String text) {
-        return text.replaceAll("[\\uE000-\\uF8FF]", "");
-    }
-
-    private String collapseBlankLines(String text) {
-        return text.replaceAll("\\n(?:\\s*\\n)+", "\n\n");
-    }
-
-    private String normalizeLines(String text) {
-        return Arrays.stream(text.split("\n"))
-                .map(line -> line
-                        .replace("\u00A0", " ")
-                        .replace("\u2007", " ")
-                        .replace("\u202F", " ")
-                        .replace("\u200B", "")
-                        .replace("\u200C", "")
-                        .replace("\u200D", "")
-                        .replace("\uFEFF", "")
-                        .replace("   ", " ")
-                        .replace(" :", ":")
-                        .replace(" ,", ",")
-                        .replace("::", " ")
-                        .replace("!!", "!")
-                        .replace("Job Title", "Title")
-                        .replace("Job Location", "Location")
-                        .replace("Job Type", "Type")
-                        .replace("Full stack", "Full Stack")
-                        .replace("Best Regards", "Best regards")
-                        .replace("Thanks & Regards", "\nThanks and regards")
-                        .replaceAll("[ \\t]+", " ")
-                        .replaceAll("^[|\\s]+", "")
-                        .trim()
-                )
-                .filter(line -> !line.matches("[|_\\-=~ ]+"))
-                .collect(Collectors.joining("\n"));
+    
+        // Join the cleaned lines back into a single string
+        body = String.join("\n", cleanedLines);
+    
+        return body;
     }
 }
