@@ -49,20 +49,20 @@ public class EmailExportService {
             }
 
             String exportedContent = emails.stream()
-                    .map(emailBodyExtractorService::extractEmailMessage)       // Extract email message details
-                    .map(this::cleanEmailBody)                                 // Clean the email body using TextFilterService
-                    .map(email -> fileExportService.saveFile(email, format))
-                    .collect(Collectors.joining("\n\n==============================\n\n"));
-           
-            return "Email has been exported in text format. Exported content:\n\n" + exportedContent;
+                .map(emailBodyExtractorService::extractEmailMessage)       // Extract email message details
+                .map(this::cleanEmailBody)                                 // Clean the email body using TextFilterService
+                .map(email -> fileExportService.saveFile(email, format))
+                .collect(Collectors.joining("\n\n==============================\n\n"));
+
+            // Return a summary report of the export operation
+            return "Email has been exported in " + format + " format. Exported content:\n\n" + exportedContent;
         }
 
         if (format.equalsIgnoreCase("word")) {
             return "Word export is not implemented yet";
         }
 
-        return "Invalid format. Use text or word.";
-    }
+        return "Invalid format. Use text or word.";    }
 
     private EmailMessage cleanEmailBody(EmailMessage email) {
         String cleanedBody = textFilterService.clean(email.getBody());

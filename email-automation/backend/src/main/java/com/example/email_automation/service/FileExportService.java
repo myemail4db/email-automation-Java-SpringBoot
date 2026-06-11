@@ -71,6 +71,8 @@ public class FileExportService {
             try (BufferedWriter writer = Files.newBufferedWriter(pathFilename)) {
                 writer.write(header);
                 writer.write(content.getBody());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
             System.out.println(pathFilename.getFileName() + " created.");
@@ -79,7 +81,6 @@ public class FileExportService {
             e.printStackTrace();
         }
 
-        // For now, just return a message. In the future, implement actual file saving logic.
         return pathFilename.getFileName().toString();
     }
 

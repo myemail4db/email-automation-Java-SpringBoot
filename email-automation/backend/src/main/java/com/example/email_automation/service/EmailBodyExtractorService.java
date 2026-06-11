@@ -206,13 +206,10 @@ public class EmailBodyExtractorService {
             ZonedDateTime zonedDateTime = ZonedDateTime.parse(receivedDate, inputFormatter);
             LocalDateTime localDateTime = zonedDateTime.toLocalDateTime();
             
-            System.out.println("LocalDateTime: " + localDateTime);
-
             // 4. Convert LocalDateTime back to a different String format
             DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("EEE, d MMM yyyy HH:mm:ss a", Locale.ENGLISH);
             String formattedDate = localDateTime.format(outputFormatter);
             
-            System.out.println("Formatted Date: " + formattedDate);
             return formattedDate;
         } catch (DateTimeParseException e) {
             System.err.println("Failed to parse the date: " + e.getMessage());
