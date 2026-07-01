@@ -30,27 +30,122 @@ public class TextFilterService {
         }
 
         // 1. Normalize line breaks consistent for Windows, Mac, and Linux
-        body = body.replaceAll("\\r\\n", "\\n") // Handle Windows-style line breaks
-                   .replaceAll("\\r", "\\n");   // Handle old Mac-style line breaks
+        body = body.replace("\r\n", "\n") // Handle Windows-style line breaks
+                   .replace("\r", "\n");   // Handle old Mac-style line breaks
+
+        System.out.println("""
+                           //////////////////////////////////////////////////////////// \n
+                           After normalizing line breaks: \n
+                           //////////////////////////////////////////////////////////// \n
+                           """ +
+                            body); // --- IGNORE ---
+
 
         // 2. Remove Reply Markers like "On [date], [name] wrote:" and similar patterns, 
         body = removeReplyMarkers(body);
 
-        // 3. Remove Noise Lines such as "From:", "Sent:", "To:", "Subject:", etc.
-        body = removeNoiseLines(body);
+        System.out.println("""
+                           //////////////////////////////////////////////////////////// \n
+                           After removing reply markers: \n
+                           //////////////////////////////////////////////////////////// \n
+                           """ +
+                            body); // --- IGNORE ---
 
-        // 4. Remove multi-line blocks to remove, such as legal disclaimers or survey requests.
+        // 3. Remove multi-line blocks to remove, such as legal disclaimers or survey requests.
         body = removeMultiLineBlocks(body);
 
-        // 5. Strip out non-printable characters that may cause issues in text processing or exporting.
-        // Strips 0-8, 11-12, and 14-31, bypassing 9 (\t), 10 (\n), and 13 (\r)
-        body = body.replaceAll("[\u0000-\u0008\u000B\u000C\u000E-\u001F]", "");
+        System.out.println("""
+                           //////////////////////////////////////////////////////////// \n
+                           After removing multi-line blocks: \n
+                           //////////////////////////////////////////////////////////// \n
+                           """ +
+                            body); // --- IGNORE ---
 
-        // 6. Consolidate multiple consecutive blank lines into a single blank line to improve readability.
-        body = body.replaceAll("(?m)(^\\s*$\\n){2,}", "\\n"); 
+        // 4. Remove Noise Lines such as "From:", "Sent:", "To:", "Subject:", etc.
+        body = removeNoiseLines(body);
+
+        System.out.println("""
+                           //////////////////////////////////////////////////////////// \n
+                           After removing noise lines: \n
+                           //////////////////////////////////////////////////////////// \n
+                           """ +
+                            body); // --- IGNORE ---
+        body = removeUnicodeCharacters(body);
+
+        System.out.println("""
+                           //////////////////////////////////////////////////////////// \n
+                           After removing non-printable characters: \n
+                           //////////////////////////////////////////////////////////// \n
+                           """ +
+                            body); // --- IGNORE ---
 
         // 7. Remove leading and trailing whitespace
         body = body.trim(); 
+
+        System.out.println("""
+                           //////////////////////////////////////////////////////////// \n
+                           After trimming whitespace: \n
+                           //////////////////////////////////////////////////////////// \n
+                           """ +
+                            body); // --- IGNORE ---
+
+        // 8. Normalize bullet lines and regular spaces, and collapse multiple blank lines into a single blank line.
+        body = normalizeLines(body);
+
+        System.out.println("""
+                            //////////////////////////////////////////////////////////// \n
+                            Normalizing lines: \n
+                            //////////////////////////////////////////////////////////// \n
+                            """ +
+                            body); // --- IGNORE ---
+
+        // 10. Consolidate multiple consecutive blank lines into a single blank line to improve readability.
+        body = body.replaceAll("(?m)^[ \\t]+$", "");
+        body = body.replaceAll("\\n\\s*\\n+", "\n\n").trim();
+
+        System.out.println("""
+                           //////////////////////////////////////////////////////////// \n
+                           After consolidating blank lines: \n
+                           //////////////////////////////////////////////////////////// \n
+                           """ +
+                            body); // --- IGNORE ---        
+
+
+        return body;
+    }
+
+    private String normalizeLines(String body) {
+
+        StringBuilder normalizedBody = new StringBuilder();
+
+        for (String line : body.split("\\n")) {
+
+            // 7. Trim leading and trailing whitespace from each line to ensure there are no unnecessary spaces at the beginning or end of the line.
+            line = line.replaceAll("^\\s*\\|\\s*", "");
+
+            // 8. Normalize bullet lines that start with a pipe character (|) followed by optional whitespace, ensuring they are formatted consistently.
+            line = line.replaceAll("\\s*\\|\\s*$", "");
+
+            // 9. Normalize bullet lines
+            line = line.replaceAll("^\\s*-\\s+", "- ");
+
+            // 10. Normalize regular spaces
+            line = line.replaceAll("[ \\t]+", " ").trim();
+
+            normalizedBody.append(line).append("\n");
+        }
+
+        return normalizedBody.toString();
+    }
+
+    private String removeUnicodeCharacters(String body) {
+
+        // 5. Strip out non-printable characters that may cause issues in text processing or exporting.
+        // Strips 0-8, 11-12, and 14-31, bypassing 9 (\t), 10 (\n), and 13 (\r)
+        
+        // Remove only private-use glyphs
+        body = body.replaceAll("[\\uE000-\\uF8FF]", "");
+        body = body.replace('\u00A0', ' ');
 
         return body;
     }
@@ -59,18 +154,21 @@ public class TextFilterService {
 
         // Multi-line blocks to remove, such as legal disclaimers or survey requests.
         List<Pattern> BLOCK_PATTERNS = Arrays.asList(
-                Pattern.compile("CONFIDENTIALITY NOTICE:.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
-                Pattern.compile("How am I doing\\?.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
-                Pattern.compile("(CCPA|CCCPA)\\s+Privacy Notice.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
-                Pattern.compile("All qualified applicants will receive consideration for employment.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
-                Pattern.compile("To unsubscribe.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
-                Pattern.compile("unsubscribe.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("-+\\s*Forwarded Message\\s*-+.*$", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE),
+                Pattern.compile("CONFIDENTIALITY NOTICE:.*$", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE),
+                Pattern.compile("How am I doing.*$", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE),
+                Pattern.compile("^(CCPA|CCCPA).*$", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE),
+                Pattern.compile("All qualified applicants will receive consideration for employment.*$", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE),
+                Pattern.compile("To unsubscribe.*$", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE),
+                Pattern.compile("unsubscribe.*$", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE),
                 Pattern.compile("(equal opportunity employer|reasonable accommodation|protected veteran|characteristic protected by law).*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
                 Pattern.compile("(confidentiality notice|privileged and confidential information).*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
                 Pattern.compile("(privacy notice|email confidentiality and privacy).*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
                 Pattern.compile("Confidentiality Notice:.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE),
-                Pattern.compile("The information contained in this message may be privileged and confidential and protected from disclosure.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE)
+                Pattern.compile("The information contained in this message.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
+                Pattern.compile("If you have any.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL)
         );
+
         // Remove multi-line blocks to remove, such as legal disclaimers or survey requests.
         for (Pattern blockPattern : BLOCK_PATTERNS) {
             body = blockPattern.matcher(body).replaceAll("");
@@ -82,24 +180,31 @@ public class TextFilterService {
 
         // Lines that are common in email replies but don't necessarily indicate the start of a thread, such as "From:", "Sent:", "To:", "Subject:", etc.
         List<Pattern> NOISE_LINE_PATTERNS = Arrays.asList(
-            Pattern.compile("^Sent from Yahoo Mail.*$", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("^Get Outlook for .*?$", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("^CAUTION:.*$", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("^WARNING:.*$", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("^-+Original Message-+$", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("^Begin forwarded message:\\s*$", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("^-+\\s*Forwarded Message\\s*-+.*$", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("^From:\\s+.*$", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("^Sent:\\s+.*$", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("^To:\\s+.*$", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("^Subject:\\s+.*$", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("^Cc:\\s+.*$", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("^Bcc:\\s+.*$", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("^From my iPhone\\s*$", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("^Sent from my iPhone\\s*$", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("^External Email.*$", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("^Need help\\?\\s*Click for assistance\\s*$", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("^Confidentiality Notice:\\s*$", Pattern.CASE_INSENSITIVE)
+
+            // Single-line patterns (Pattern.MULTILINE)
+            Pattern.compile("^From:\\s+.*$", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE),
+            Pattern.compile("^Sent:\\s+.*$", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE),
+            Pattern.compile("^To:\\s+.*$", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE),
+            Pattern.compile("^Subject:\\s+.*$", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE),
+            Pattern.compile("^Cc:\\s+.*$", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE),
+            Pattern.compile("^Bcc:\\s+.*$", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE),
+            Pattern.compile("^From my iPhone\\s*$", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE),
+            Pattern.compile("^Sent from my iPhone\\s*$", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE),
+
+            // Multi-line patterns (Pattern.Dotall)
+            Pattern.compile("^Sent from Yahoo Mail.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
+            Pattern.compile("^Get Outlook for.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
+            Pattern.compile("^CAUTION:.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
+            Pattern.compile("^WARNING:.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
+            Pattern.compile("^-+Original Message-+.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
+            Pattern.compile("^Begin forwarded message:\\s*.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
+            Pattern.compile("^-+\\s*Forwarded Message\\s*-+.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
+            Pattern.compile("^External Email.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
+            Pattern.compile("^Need help\\?\\s*Click for assistance\\s*.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
+            Pattern.compile("^Confidentiality Notice:\\s*.*?(?=\\n\\n|\\Z)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
+
+            // Patterns to identify multi-line blocks that start with a specific marker and continue until the end of the line or until a character is seen.
+            Pattern.compile("\\s*\\|\\s*$", Pattern.MULTILINE)
         );
 
         // Remove noise lines, such as "From:", "Sent:", "To:", "Subject:", etc.
