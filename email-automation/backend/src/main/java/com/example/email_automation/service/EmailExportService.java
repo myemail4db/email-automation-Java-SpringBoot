@@ -1,7 +1,9 @@
 package com.example.email_automation.service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Locale;
 
 import org.springframework.stereotype.Service;
 
@@ -18,15 +20,18 @@ public class EmailExportService {
     private final GmailService gmailService;
     private final TextFilterService textFilterService;
     private final EmailBodyExtractorService emailBodyExtractorService;
+    private final FileExportService fileExportService;
 
     public EmailExportService(
             GmailService gmailService,
             TextFilterService textFilterService,
-            EmailBodyExtractorService emailBodyExtractorService) {
+            EmailBodyExtractorService emailBodyExtractorService,
+            FileExportService fileExportService) {
 
         this.gmailService = gmailService;
         this.textFilterService = textFilterService;
         this.emailBodyExtractorService = emailBodyExtractorService;
+        this.fileExportService = fileExportService;
     }
 
     public String exportEmails(String format) {
@@ -34,8 +39,6 @@ public class EmailExportService {
         if (format == null) {
             return "Format parameter is required. Use text or word.";
         }
-
-        FileExportService fileExportService = new FileExportService();
 
         if (format.equalsIgnoreCase("text")) {
 
@@ -48,21 +51,44 @@ public class EmailExportService {
                 return "No emails found to export.";
             }
 
-            String exportedContent = emails.stream()
-                .map(emailBodyExtractorService::extractEmailMessage)       // Extract email message details
-                .map(this::cleanEmailBody)                                 // Clean the email body using TextFilterService
-                .map(email -> fileExportService.saveFile(email, format))
-                .collect(Collectors.joining("\n\n==============================\n\n"));
+            int filesSaved = 0;
+            int filesFailed = 0;
+            for (int i = 0; i < emails.size(); i++) {
+                EmailMessage email = emailBodyExtractorService.extractEmailMessage(emails.get(i));
+                email = cleanEmailBody(email);
+                boolean isSaved = fileExportService.saveFile(email, format);
+
+                if (isSaved) {
+                    filesSaved++;
+                } else {
+                    filesFailed++;
+                }
+            }
 
             // Return a summary report of the export operation
-            return "Email has been exported in " + format + " format. Exported content:\n\n" + exportedContent;
+            String exportHeader = "Export Summary:\n";
+            String exportReport = "Format: " + format + "\n" +
+                                  "Output Directory: " + fileExportService.getExportDirectory() + "\n" +
+                                  "Emails found: " + emails.size() + "\n" +
+                                  "Files saved: " + filesSaved + "\n" +
+                                  "Files failed: " + filesFailed + "\n" +
+                                  "Export completed at: " + normalizeCurrentDate(LocalDateTime.now()) + "\n";
+
+                                  
+            System.out.print(exportHeader + exportReport);
+ 
+            exportHeader = "<h1>Export Summary</h1>";
+            exportReport = exportReport.replaceAll("\n", "<br>");
+
+            return exportHeader + exportReport;
         }
 
         if (format.equalsIgnoreCase("word")) {
             return "Word export is not implemented yet";
         }
 
-        return "Invalid format. Use text or word.";    }
+        return "Invalid format. Use text or word.";    
+    }
 
     private EmailMessage cleanEmailBody(EmailMessage email) {
         String cleanedBody = textFilterService.clean(email.getBody());
@@ -75,4 +101,17 @@ public class EmailExportService {
         );
     }
 
+    private String normalizeCurrentDate(LocalDateTime currentDate) {
+
+        // 2. Define the exact format pattern
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm a", Locale.US);
+
+        // 3. Format the LocalDateTime object into a String
+        String formattedDateTime = currentDate.format(formatter);
+
+        // Print the result (e.g., "06/12/2026 05:12 PM")
+        System.out.println(formattedDateTime);
+        
+        return formattedDateTime;
+    }
 }
