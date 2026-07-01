@@ -6,11 +6,18 @@ package com.example.email_automation.model;
  
 public class EmailMessage {
 
-    private final String subject;
-    private final String from;
-    private final String body;
-    private final String receivedDate;
+    private String subject;
+    private String from;
+    private String body;
+    private String receivedDate;
 
+    public EmailMessage() {
+        this.subject = "";
+        this.from = "";
+        this.body = "";
+        this.receivedDate = "";
+    }
+    
     public EmailMessage(String subject, String from, String body, String receivedDate) {
         this.subject = subject;
         this.from = from;
@@ -18,14 +25,29 @@ public class EmailMessage {
         this.receivedDate = receivedDate;
     }
 
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
     public String getSubject() {
         return subject;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
     }
     public String getFrom() {
         return from;
     }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
     public String getBody() {
         return body;
+    }
+
+    public void setReceivedDate(String receivedDate) {
+        this.receivedDate = receivedDate;
     }
     public String getReceivedDate() {
         return receivedDate;
