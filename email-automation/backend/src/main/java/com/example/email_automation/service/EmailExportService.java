@@ -40,7 +40,7 @@ public class EmailExportService {
             return "Format parameter is required. Use text or word.";
         }
 
-        if (format.equalsIgnoreCase("text")) {
+        if (format.equalsIgnoreCase("text") || format.equalsIgnoreCase("word")) {
 
             List<Message> emails = gmailService.getRecentEmails();
 
@@ -81,10 +81,6 @@ public class EmailExportService {
             exportReport = exportReport.replaceAll("\n", "<br>");
 
             return exportHeader + exportReport;
-        }
-
-        if (format.equalsIgnoreCase("word")) {
-            return "Word export is not implemented yet";
         }
 
         return "Invalid format. Use text or word.";    
