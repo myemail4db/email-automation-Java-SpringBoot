@@ -87,8 +87,7 @@ public class FileExportService {
             return isSaved;
 
         } catch (IOException e) {
-            e.printStackTrace(); 
-            logger.error("IOException occurred while saving file: {}", e.getMessage());
+            logger.error("IOException occurred while saving text file: {}", e);
         }
 
         return isSaved;
@@ -111,6 +110,9 @@ public class FileExportService {
             try (XWPFDocument document = new XWPFDocument();
                  FileOutputStream out = new FileOutputStream(pathFilename.toFile())) {
 
+                // Initilize the document
+                createWordParagraph(document);
+
                 // Header Block
                 addWordHeader(document, content, pathFilename, format);
                 
@@ -124,28 +126,30 @@ public class FileExportService {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
-            logger.error("IOException occurred while saving Word file: {}", e.getMessage());
+            logger.error("IOException occurred while saving Word file: {}", e);
         }
 
         return isSaved;
     }
-
+  
     private void addWordBody(XWPFDocument document, EmailMessage content) {
+
+        XWPFParagraph paragraph = createWordParagraph(document);
+
+        XWPFRun bodyRun = createWordLabelRun(paragraph);
 
         String[] lines = content.getBody().split("\\R", -1);
 
-        for (String line : lines) {
-            XWPFParagraph paragraph = document.createParagraph();   
-            XWPFRun bodyRun = paragraph.createRun();
-            bodyRun.setText(line);
+        for (int i = 0; i < lines.length; i++) {
 
-            if (line.isBlank()) {
-                bodyRun.addBreak();
-            } else {
-                
+            if (!lines[i].isBlank()) {
+                bodyRun.setText(lines[i]);
             }
-        };
+
+            if (i < lines.length - 1) {
+                bodyRun.addBreak();
+            }
+        }
     }
 
     private String createTextHeader(EmailMessage content, String format, Path pathFilename) {
@@ -163,73 +167,80 @@ public class FileExportService {
         return header;
     }
 
+    private XWPFParagraph createWordParagraph(XWPFDocument document) {
+
+        XWPFParagraph paragraph = document.createParagraph();
+        paragraph.setSpacingBefore(0);
+        paragraph.setSpacingAfter(0);
+
+        return paragraph;
+    }
+
+    private XWPFRun createWordLabelRun(XWPFParagraph paragraph) {
+
+        XWPFRun labelRun = paragraph.createRun();
+        labelRun.setFontFamily("Courier New");
+        labelRun.setFontSize(10);
+
+        return labelRun;
+    }
+
     /**
      * Helper to add a nicely formatted metadata header to the memo.
      */
     private void addWordHeader(XWPFDocument document, EmailMessage content, Path pathFilename, String format) {
 
-        XWPFRun labelRun;
-        XWPFRun valueRun;
+        addWordHeaderTitle(document);
+        addWordHeaderLine(document, "Subject", content.getSubject());
+        addWordHeaderLine(document, "From", content.getFrom());
+        addWordHeaderLine(document, "Date", content.getReceivedDate());
+        addWordHeaderLine(document, "Workflow Status", exportDirectory);
+        addWordHeaderLine(document, "Export Format", format);
+        addWordHeaderLine(document, "File Name", pathFilename.getFileName().toString());
+        addWordSeparator(document);
 
-        XWPFParagraph paragraph = document.createParagraph();
-        labelRun = paragraph.createRun();
-        labelRun.setText("============================================================");
-        
-        paragraph = document.createParagraph();
-        labelRun = paragraph.createRun();
-        labelRun.setBold(true);
-        labelRun.setText("Subject           : ");
-        valueRun = paragraph.createRun();
-        valueRun.setText(content.getSubject());
-        
-
-        paragraph = document.createParagraph();
-        labelRun = paragraph.createRun();
-        labelRun.setBold(true);
-        labelRun.setText("From              : ");
-        valueRun = paragraph.createRun();
-        valueRun.setText(content.getFrom());
-
-        paragraph = document.createParagraph();
-        labelRun = paragraph.createRun();
-        labelRun.setBold(true);
-        labelRun.setText("Date              : ");
-        valueRun = paragraph.createRun();
-        valueRun.setText(content.getReceivedDate());
-
-        paragraph = document.createParagraph();
-        labelRun = paragraph.createRun();
-        labelRun.setBold(true);
-        labelRun.setText("Workflow Status   : ");
-        valueRun = paragraph.createRun();
-        valueRun.setText(getExportDirectory());
-
-        paragraph = document.createParagraph();
-        labelRun = paragraph.createRun();
-        labelRun.setBold(true);
-        labelRun.setText("Export Format     : ");
-        valueRun = paragraph.createRun();
-        valueRun.setText(format);
-
-        paragraph = document.createParagraph();
-        labelRun = paragraph.createRun();
-        labelRun.setBold(true);
-        labelRun.setText("File Name         : ");
-        valueRun = paragraph.createRun();
-        valueRun.setText(pathFilename.getFileName().toString());
-
-        paragraph = document.createParagraph();
-        labelRun = paragraph.createRun();
-        labelRun.setText("============================================================");
     }
 
     private void addWordHeaderLine(XWPFDocument document, String label, String value) {
-        XWPFParagraph paragraph = document.createParagraph();
-        XWPFRun labelRun = paragraph.createRun();
+
+        XWPFParagraph paragraph = createWordParagraph(document);
+
+        XWPFRun labelRun = createWordLabelRun(paragraph);
         labelRun.setBold(true);
-        labelRun.setText(label + " : ");
-        XWPFRun valueRun = paragraph.createRun();
+        labelRun.setText(String.format("%-18s: ", label));
+
+        XWPFRun valueRun = createWordLabelRun(paragraph);
         valueRun.setText(value);
+
+    }
+
+    private void addWordHeaderTitle(XWPFDocument document) {
+
+        XWPFParagraph paragraph = createWordParagraph(document);
+        XWPFRun labelRun = createWordLabelRun(paragraph);
+        labelRun.setBold(true);
+        labelRun.setText("============================================================");
+
+        paragraph = createWordParagraph(document);
+        labelRun = createWordLabelRun(paragraph);
+        labelRun.setBold(true);
+        labelRun.setText("EMAIL DETAILS");
+
+        paragraph = createWordParagraph(document);
+        labelRun = createWordLabelRun(paragraph);
+        labelRun.setBold(true);
+        labelRun.setText("============================================================");
+
+    }
+
+
+    private void addWordSeparator(XWPFDocument document) {
+
+        XWPFParagraph paragraph = createWordParagraph(document);
+        XWPFRun labelRun = createWordLabelRun(paragraph);
+        labelRun.setBold(true);
+        labelRun.setText("============================================================");
+
     }
 
     private String createSafeFilename(String input) {
