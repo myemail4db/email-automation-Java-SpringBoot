@@ -110,9 +110,6 @@ public class FileExportService {
             try (XWPFDocument document = new XWPFDocument();
                  FileOutputStream out = new FileOutputStream(pathFilename.toFile())) {
 
-                // Initilize the document
-                createWordParagraph(document);
-
                 // Header Block
                 addWordHeader(document, content, pathFilename, format);
                 
