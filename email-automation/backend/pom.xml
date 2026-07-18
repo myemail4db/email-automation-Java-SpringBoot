@@ -76,9 +76,9 @@
 
 		<!-- Google HTTP Client Library (JSON support) -->
 		<dependency>
-		<groupId>com.google.http-client</groupId>
-		<artifactId>google-http-client-jackson2</artifactId>
-		<version>1.44.2</version>
+			<groupId>com.google.http-client</groupId>
+			<artifactId>google-http-client-jackson2</artifactId>
+			<version>1.44.2</version>
 		</dependency>
 
 		<!-- Google API Client Library (Core) -->
@@ -97,6 +97,12 @@
 		<dependency>
 			<groupId>jakarta.mail</groupId>
 			<artifactId>jakarta.mail-api</artifactId>
+		</dependency>
+		<!-- Java API for Microsoft Documents -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>5.2.5</version> <!-- Or use the latest stable version -->
 		</dependency>
 	</dependencies>
 
