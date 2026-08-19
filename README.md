@@ -40,13 +40,14 @@ The Java project is maintained as an independent application with its own archit
 ## Workflow
 
 ```mermaid
-flowchart LR
-    A[Gmail Label] --> B[Retrieve Emails]
-    B --> C[Extract Content]
-    C --> D[Filter Text]
-    D --> E[TXT / DOCX Export]
-    E --> F[ZIP Processing<br/>(In Development)]
-    F --> G[Outbound Email<br/>(In Development)]
+flowchart TD
+    A["Gmail Authentication<br/>(Completed)"] --> B["Email Retrieval<br/>(Completed)"]
+    B --> C["Content Extraction<br/>(Completed)"]
+    C --> D["Text Filtering<br/>(Completed)"]
+    D --> E["TXT / DOCX Export<br/>(Completed)"]
+    E --> F["ZIP Processing<br/>(In Development)"]
+    F --> G["Outbound Email<br/>(In Development)"]
+    G --> H["Workflow Reporting<br/>(Planned)"]
 ```
 
 The application processes emails from a user-designated Gmail label and does not automatically organize or move messages from the user's Inbox.
