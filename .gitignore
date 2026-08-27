@@ -1,14 +1,77 @@
-HELP.md
+# =========================================================
+# Operating System Files
+# =========================================================
 
 # macOS
 .DS_Store
+.AppleDouble
+.LSOverride
 
-# Maven / Spring Boot
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+
+
+# =========================================================
+# IDE / Editor
+# =========================================================
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# VS Code
+.vscode/
+
+# Eclipse / Spring Tool Suite
+.project
+.classpath
+.settings/
+.springBeans
+.sts4-cache/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Postman
+.postman/
+*.postman_environment.json
+postman/*local*
+postman/*secret*
+
+
+# =========================================================
+# Java / Maven
+# =========================================================
+
 target/
-!**/src/main/**/target/
-!**/src/test/**/target/
+*.class
+*.jar
+*.war
+*.ear
 
+
+
+# =========================================================
 # Logs
+# =========================================================
+
 logs/
 *.log
 
@@ -21,17 +84,32 @@ error/
 ready_to_send/
 send_archive/
 
+
+
+# =========================================================
 # Generated archives
+# =========================================================
+
 *.zip
 
-# OAuth / secrets — never commit these
+
+# =========================================================
+# OAuth / Private Configuration
+# =========================================================
+
 .env
 credentials.json
 tokens/
 token.json
 *.secret.json
+**/application-private.properties
 
-### STS ###
+
+
+# =========================================================
+# STS 
+# =========================================================
+
 .apt_generated
 .classpath
 .factorypath
@@ -39,28 +117,3 @@ token.json
 .settings
 .springBeans
 .sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
-.vscode/
-
-### Postman ###
-.postman/
-*.postman_environment.json
-postman/*local*
-postman/*secret*
