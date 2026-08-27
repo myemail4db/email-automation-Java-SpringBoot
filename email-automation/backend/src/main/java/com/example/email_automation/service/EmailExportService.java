@@ -121,11 +121,9 @@ public class EmailExportService {
             workflowReport.setEmailSent(false); // Assuming email sending is not implemented yet
             workflowReport.setWorkflowCompleted(true);
 
-
             // Reporting - end time and duration
             workflowReport.setEndTime(LocalDateTime.now());
             workflowReport.setDuration((int) java.time.Duration.between(workflowReport.getStartTime(), workflowReport.getEndTime()).toSeconds());            
-
 
             // Reporting - create the summary report to the browser and console
             String reportHeader = createReportHeader();
@@ -154,7 +152,6 @@ public class EmailExportService {
                               "Export completed at: " + workflowReport.getEndTime() + "\n" +
                               "Duration: " + workflowReport.getDuration() + " seconds\n";
 
-                      
         // Print the export summary to the console
         logger.info(reportHeader + exportReport);
 
@@ -172,17 +169,4 @@ public class EmailExportService {
         );
     }
 
-    // private String formatCurrentDateTime(LocalDateTime currentDate) {
-
-    //     // 2. Define the exact format pattern
-    //     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm a", Locale.US);
-
-    //     // 3. Format the LocalDateTime object into a String
-    //     String formattedDateTime = currentDate.format(formatter);
-
-    //     // Log the result (e.g., "06/12/2026 05:12 PM")
-    //     logger.info(formattedDateTime);
-        
-    //     return formattedDateTime;
-    // }
 }
