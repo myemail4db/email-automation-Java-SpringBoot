@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -22,18 +21,14 @@ public class FileExportService {
 
     private static final Logger logger = LoggerFactory.getLogger(FileExportService.class);
 
-    @Value("${email.export.output-dir}")
-    private String exportDirectory;
-
-    public String getExportDirectory() {
-        return exportDirectory;
-    }
+    @Value("${email.files.processed-dir}")
+    private String emailFilesProcessedDir;
 
     public boolean saveFile(EmailMessage content, String format) {
 
         if (content == null || content.getSubject() == null || content.getBody() == null) {
             logger.error("EmailMessage content is null or missing required fields.");
-            return false;
+            throw new IllegalArgumentException("EmailMessage content is null or missing required fields.");
         }
 
         if (format.equalsIgnoreCase("text")) {
@@ -47,8 +42,7 @@ public class FileExportService {
         } else {
 
             logger.error("Unsupported format: {}. Supported formats are 'text' and 'word';.", format);
-            return false;
-
+            throw new IllegalArgumentException("Unsupported format: " + format + ". Supported formats are 'text' and 'word'.");
         }
     }
 
@@ -77,20 +71,20 @@ public class FileExportService {
             if (isSaved) {
 
                 logger.info("Created {}.", pathFilename.getFileName());
+                return true;
 
             } else {
 
                 logger.error("Failed to create {}.", pathFilename.getFileName());
+                return false;
 
             }
 
-            return isSaved;
-
         } catch (IOException e) {
             logger.error("IOException occurred while saving text file: {}", e);
+            throw new RuntimeException("IOException occurred while saving text file: " + e.getMessage(), e);
         }
 
-        return isSaved;
     }
 
     private boolean saveWordFile(EmailMessage content, String format) {
@@ -122,11 +116,22 @@ public class FileExportService {
                 isSaved = true;
             }
 
+            if (isSaved) {
+
+                logger.info("Created {}.", pathFilename.getFileName());
+                return true;                
+
+            } else {
+
+                logger.error("Failed to create {}.", pathFilename.getFileName());
+                return false;
+
+            }
         } catch (IOException e) {
             logger.error("IOException occurred while saving Word file: {}", e);
+            throw new RuntimeException("IOException occurred while saving Word file: " + e.getMessage(), e);
         }
 
-        return isSaved;
     }
   
     private void addWordBody(XWPFDocument document, EmailMessage content) {
@@ -157,7 +162,7 @@ public class FileExportService {
                 "Subject           : " + content.getSubject() + "\n" +
                 "From              : " + content.getFrom() + "\n" +
                 "Date              : " + content.getReceivedDate() + "\n" +
-                "Workflow Status   : " + exportDirectory + "\n" +
+                /**"Workflow Status   : " + gmailSuccessfulLabel + "\n" + */
                 "Export Format     : " + format + "\n" +
                 "File Name         : " + pathFilename.getFileName() + "\n" +
                 "============================================================\n\n";
@@ -191,7 +196,7 @@ public class FileExportService {
         addWordHeaderLine(document, "Subject", content.getSubject());
         addWordHeaderLine(document, "From", content.getFrom());
         addWordHeaderLine(document, "Date", content.getReceivedDate());
-        addWordHeaderLine(document, "Workflow Status", exportDirectory);
+        /** addWordHeaderLine(document, "Workflow Status", gmailSuccessfulLabel); */
         addWordHeaderLine(document, "Export Format", format);
         addWordHeaderLine(document, "File Name", pathFilename.getFileName().toString());
         addWordSeparator(document);
@@ -267,22 +272,23 @@ public class FileExportService {
             throw new IllegalArgumentException("Unsupported format: " + format);
         }
 
-        // Clean the subject to create a safe filename    
-
-        Path dirPath = Paths.get(exportDirectory);
-        Path pathFilename = dirPath.resolve(filenameString + extension);
-
         // Check if the directory exists, and if not, create it
-        if (!Files.exists(dirPath)) {
-            Files.createDirectories(dirPath);
+        Path directoryPath = Path.of(emailFilesProcessedDir);
+
+        if (!Files.exists(directoryPath)) {
+            Files.createDirectories(directoryPath);
         }
 
         // Check if the file already exists, and if so, append a number to the filename until we find a unique name
+        Path pathFilename = directoryPath.resolve(filenameString + extension);
+
         int count = 1;
+
         while (Files.exists(pathFilename)) {
 
-            // If the file already exists, append a number to the filename
-            pathFilename = dirPath.resolve(filenameString + "_" + count + extension);
+            pathFilename =
+                    directoryPath.resolve(filenameString + "_" + count + extension);
+
             count++;
         }
 

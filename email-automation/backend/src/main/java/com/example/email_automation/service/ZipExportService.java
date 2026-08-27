@@ -21,13 +21,16 @@ public class ZipExportService {
     
     private static final Logger logger = LoggerFactory.getLogger(ZipExportService.class);
 
-    @Value("${email.export.output-dir}")
-    private String sourceDirPath;
+    @Value("${email.files.processed-dir}")
+    private String emailFilesProcessedDir;
 
-    @Value("${email.zip.export-dir}")
-    private String zipDirPath;
+    @Value("${email.files.zip-dir}")
+    private String zipFilesZipDir;
 
-    public boolean createZipEmails(String format) {
+    @Value("${email.files.zip-prefix}")
+    private String zipFilesZipPrefix;
+
+    public boolean createZipEmail(String format) {
 
         String extension;
         
@@ -42,10 +45,10 @@ public class ZipExportService {
         try {
 
             // Check if the zipDirPath exists; if it doesn't exist, create it
-            createDestinationPath(zipDirPath);
+            createDestinationPath(zipFilesZipDir);
 
             // create the zip filename with path
-            Path zipFile = createZipPath(Path.of(zipDirPath), format);
+            Path zipFile = createZipPath(Path.of(zipFilesZipDir), format);
             
             return addFiles(zipFile, extension);
 
@@ -63,13 +66,13 @@ public class ZipExportService {
     private Path createZipPath(Path sourceDirectory, String format) throws IOException {
 
         String timestamp = formatReceivedDateForFilename();
-        String zipFileName = "exported_emails_" + format + "_" + timestamp + ".zip";
+        String zipFileName = zipFilesZipPrefix + "_" + format + "_" + timestamp + ".zip";
         Path zipFilePath = sourceDirectory.resolve(zipFileName);
         
         // if zip file already exists, add a _number suffix to avoid overwriting
         int counter = 1;
         while (Files.exists(zipFilePath)) {
-            zipFileName = "exported_emails_" + format + "_" + timestamp + "_" + counter + ".zip";
+            zipFileName = zipFilesZipPrefix + "_" + format + "_" + timestamp + "_" + counter + ".zip";
 
             zipFilePath = sourceDirectory.resolve(zipFileName);
             counter++;
@@ -80,7 +83,7 @@ public class ZipExportService {
 
     private boolean addFiles(Path zipFile, String extension) {
 
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Path.of(sourceDirPath))) {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Path.of(emailFilesProcessedDir))) {
 
             try (OutputStream os = Files.newOutputStream(zipFile, StandardOpenOption.CREATE);
                  ZipOutputStream zos = new ZipOutputStream(os);) {

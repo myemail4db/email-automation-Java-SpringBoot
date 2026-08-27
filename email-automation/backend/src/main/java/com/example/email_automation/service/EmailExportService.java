@@ -1,15 +1,14 @@
 package com.example.email_automation.service;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.example.email_automation.model.EmailMessage;
+import com.example.email_automation.model.WorkflowReport;
 import com.google.api.services.gmail.model.Message;
 
 /**
@@ -46,65 +45,118 @@ public class EmailExportService {
     // Main workflow
     public String exportEmails(String format) {
 
+        // Initialize a workflow report to track the export process
+        WorkflowReport workflowReport = new WorkflowReport();
+
         if (format == null) {
             return "Format parameter is required. Use text or word.";
         }
 
         if (format.equalsIgnoreCase("text") || format.equalsIgnoreCase("word")) {
 
+            // Reporting - set the format in the workflow report
+            workflowReport.setFormat(format);
+
+            // Get recent emails from Gmail
             List<Message> emails = gmailService.getRecentEmails();
 
+            // Reporting - emails found
+            workflowReport.setEmailsFound(emails.size());
+
             logger.info("Found {} Gmail emails for {} export.", emails.size(), format);
+            System.out.println("Found " + emails.size() + " Gmail emails for " + format + " export.");
 
             // Handle case when there are no emails to export
             if (emails.isEmpty() || emails.get(0) == null) {
                 return "No emails found to export.";
             }
 
+            // Initialize counters for saved and failed files
             int filesSaved = 0;
             int filesFailed = 0;
 
+            // Process each email
             for (int i = 0; i < emails.size(); i++) {
-                EmailMessage email = emailBodyExtractorService.extractEmailMessage(emails.get(i));
-                email = cleanEmailBody(email);
-                boolean isSaved = fileExportService.saveFile(email, format);
+                
+                try {
 
-                if (isSaved) {
-                    filesSaved++;
-                } else {
-                    filesFailed++;
+                    EmailMessage email = emailBodyExtractorService.extractEmailMessage(emails.get(i));
+                    email = cleanEmailBody(email);
+                    boolean isSaved = fileExportService.saveFile(email, format);                
+
+                    if (isSaved) {
+
+                        // Reporting
+                        filesSaved++;
+
+                        try {
+                            gmailService.moveEmailToLabel(emails.get(i), isSaved);
+
+                        } catch (Exception e) {
+                            logger.error("Error occurred while moving email to label: {}", e);
+                        }
+
+                    } else {
+
+                        // Reporting
+                        filesFailed++;
+
+                        gmailService.moveEmailToLabel(emails.get(i), isSaved);
+                    }
+
+                } catch (Exception e) {
+                    logger.error("Error occurred: " + e.getMessage(), e);
+                    throw new RuntimeException("Error occurred: " + e.getMessage(), e);
                 }
             }
 
-            String exportHeader = createExportHeader();
-            String exportReport = generateExportReport(format, emails, filesSaved, filesFailed); 
-            exportReport = exportReport.replaceAll("\n", "<br>");
+            // Reporting
+            workflowReport.setFilesSaved(filesSaved);
+            workflowReport.setFilesFailed(filesFailed);
 
-            boolean createZipFile = zipExportService.createZipEmails(format);
+            boolean isZipFileCreated = zipExportService.createZipEmail(format);
 
-            return exportHeader + exportReport;
+            // Reporting
+            workflowReport.setZipCreated(isZipFileCreated);
+            workflowReport.setEmailSent(false); // Assuming email sending is not implemented yet
+            workflowReport.setWorkflowCompleted(true);
+
+
+            // Reporting - end time and duration
+            workflowReport.setEndTime(LocalDateTime.now());
+            workflowReport.setDuration((int) java.time.Duration.between(workflowReport.getStartTime(), workflowReport.getEndTime()).toSeconds());            
+
+
+            // Reporting - create the summary report to the browser and console
+            String reportHeader = createReportHeader();
+            String reportBody = createReportBody(workflowReport); 
+            reportBody = reportBody.replaceAll("\n", "<br>");
+
+            return reportHeader + reportBody;
         }
 
         return "Invalid format. Use text or word.";    
     }
 
     // Helper methods
-    private String createExportHeader() {
+    private String createReportHeader() {
         return "<h1>Export Summary</h1>";
     }
 
-    private String generateExportReport(String format, List<Message> emails, int filesSaved, int filesFailed) {
+    private String createReportBody(WorkflowReport workflowReport) {
         // Return a summary report of the export operation
-        String exportHeader = "Export Summary:\n";
-        String exportReport = "Format: " + format + "\n" +
-                              "Output Directory: " + fileExportService.getExportDirectory() + "\n" +
-                              "Emails found: " + emails.size() + "\n" +
-                              "Files saved: " + filesSaved + "\n" +
-                              "Files failed: " + filesFailed + "\n" +
-                              "Export completed at: " + formatCurrentDateTime(LocalDateTime.now()) + "\n";
+        String reportHeader = "Export Summary:\n";
+        String exportReport = "Format: " + workflowReport.getFormat() + "\n" +
+                              "Emails found: " + workflowReport.getEmailsFound() + "\n" +
+                              "Files saved: " + workflowReport.getFilesSaved() + "\n" +
+                              "Files failed: " + workflowReport.getFilesFailed() + "\n" +
+                              "Zip file created: " + workflowReport.isZipCreated() + "\n" +
+                              "Export completed at: " + workflowReport.getEndTime() + "\n" +
+                              "Duration: " + workflowReport.getDuration() + " seconds\n";
+
                       
         // Print the export summary to the console
-        logger.info(exportHeader + exportReport);
+        logger.info(reportHeader + exportReport);
 
         return exportReport;
     }
@@ -120,17 +172,17 @@ public class EmailExportService {
         );
     }
 
-    private String formatCurrentDateTime(LocalDateTime currentDate) {
+    // private String formatCurrentDateTime(LocalDateTime currentDate) {
 
-        // 2. Define the exact format pattern
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm a", Locale.US);
+    //     // 2. Define the exact format pattern
+    //     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm a", Locale.US);
 
-        // 3. Format the LocalDateTime object into a String
-        String formattedDateTime = currentDate.format(formatter);
+    //     // 3. Format the LocalDateTime object into a String
+    //     String formattedDateTime = currentDate.format(formatter);
 
-        // Log the result (e.g., "06/12/2026 05:12 PM")
-        logger.info(formattedDateTime);
+    //     // Log the result (e.g., "06/12/2026 05:12 PM")
+    //     logger.info(formattedDateTime);
         
-        return formattedDateTime;
-    }
+    //     return formattedDateTime;
+    // }
 }

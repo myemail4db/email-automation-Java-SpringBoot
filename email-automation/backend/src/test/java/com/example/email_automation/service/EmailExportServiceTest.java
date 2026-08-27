@@ -4,16 +4,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.example.email_automation.model.EmailMessage;
 import com.google.api.services.gmail.model.Message;
@@ -108,7 +107,6 @@ public class EmailExportServiceTest {
         when(emailBodyExtractorService.extractEmailMessage(message)).thenReturn(emailMessage);
         when(textFilterService.clean(emailMessage.getBody())).thenReturn(emailMessage.getBody());
         when(fileExportService.saveFile(any(EmailMessage.class), eq(format))).thenReturn(true);
-        when(fileExportService.getExportDirectory()).thenReturn("processed_review/");
 
         // Act
         String result = emailExportService.exportEmails(format);

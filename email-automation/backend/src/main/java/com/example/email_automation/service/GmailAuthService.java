@@ -2,7 +2,6 @@ package com.example.email_automation.service;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -31,7 +30,10 @@ public class GmailAuthService {
     private static final String TOKENS_DIRECTORY_PATH = "tokens"; // store tokens locally
 
     // Scopes define what the app can do (e.g., read, send emails)
-    private static final List<String> SCOPES = Collections.singletonList(GmailScopes.GMAIL_READONLY);
+    private static final List<String> SCOPES = List.of(
+        GmailScopes.GMAIL_READONLY,
+        GmailScopes.GMAIL_SEND
+    );
 
     private static Credential getCredentials() throws Exception {
         // load client secrets from credentials.json

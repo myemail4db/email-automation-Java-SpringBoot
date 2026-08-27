@@ -2,14 +2,17 @@ package com.example.email_automation.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.Message;
 import com.google.api.services.gmail.model.Profile;
+import com.google.api.services.gmail.model.ModifyMessageRequest;
 
 /**
  * This service gets the raw emails from Gmail
@@ -21,6 +24,15 @@ public class GmailService {
     private static final Logger logger = LoggerFactory.getLogger(GmailService.class);
 
     private final GmailAuthService authService;
+
+    @Value("${email.gmail.source-label}")
+    private String emailGmailSourceLabel;
+
+    @Value("${email.gmail.success-label}")
+    private String emailGmailSuccessLabel;
+
+    @Value("${email.gmail.fail-label}")
+    private String emailGmailFailLabel;
 
     public GmailService(GmailAuthService authService) {
         this.authService = authService;
@@ -57,7 +69,7 @@ public class GmailService {
             // return the result
             List<Message> messages = service.users().messages()
                 .list("me")
-                .setQ("label: for_friend")
+                .setQ("label: " + emailGmailSourceLabel)
                 .setMaxResults(5L)
                 .execute()
                 .getMessages();
@@ -84,4 +96,31 @@ public class GmailService {
         
         return new ArrayList<>();
     }
+
+    public void moveEmailToLabel(Message message, boolean isSuccess) throws Exception {
+    
+        // Determine the label to apply based on success or failure
+        String userId = "me";
+
+        Gmail service = authService.getGmailClient();
+
+        String AddLabelId;
+        String RemoveLabelId;
+
+        if (isSuccess) {
+            AddLabelId = emailGmailSuccessLabel;
+            RemoveLabelId = emailGmailSourceLabel;
+        } else {
+            AddLabelId = emailGmailFailLabel;
+            RemoveLabelId = emailGmailSourceLabel;
+        }
+
+        ModifyMessageRequest mods = new ModifyMessageRequest()
+            .setAddLabelIds(Collections.singletonList(AddLabelId))
+            .setRemoveLabelIds(Collections.singletonList(RemoveLabelId));
+
+        Message response = service.users().messages().modify(userId, message.getId(), mods).execute();
+
+    }
+
 }
