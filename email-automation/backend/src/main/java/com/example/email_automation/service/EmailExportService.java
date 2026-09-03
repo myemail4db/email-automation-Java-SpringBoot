@@ -119,7 +119,7 @@ public class EmailExportService {
 
             // Reporting
             workflowReport.setZipCreated(isZipFileCreated);
-            workflowReport.setWorkflowCompleted(true);
+            workflowReport.setWorkflowCompleted(isZipFileCreated);
 
             // Reporting - end time and duration
             workflowReport.setEndTime(LocalDateTime.now());
