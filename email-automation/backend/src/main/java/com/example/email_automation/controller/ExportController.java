@@ -19,7 +19,7 @@ public class ExportController {
         this.emailExportService = emailExportService;
     }
     
-    @GetMapping(value = "/api/export")
+    @GetMapping("/api/export")
     public String getEmails(@RequestParam(required = false) String format) {
 
         if (format == null || format.isEmpty()) {
