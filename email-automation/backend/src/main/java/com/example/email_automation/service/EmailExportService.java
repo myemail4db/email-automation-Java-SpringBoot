@@ -80,11 +80,11 @@ public class EmailExportService {
         int filesFailed = 0;
 
         // Process each email
-        for (int i = 0; i < emails.size(); i++) {
+        for (Message message : emails) {
             
             try {
 
-                EmailMessage email = emailBodyExtractorService.extractEmailMessage(emails.get(i));
+                EmailMessage email = emailBodyExtractorService.extractEmailMessage(message);
                 email = cleanEmailBody(email);
                 boolean isSaved = fileExportService.saveFile(email, format);                
 
@@ -94,7 +94,7 @@ public class EmailExportService {
                     filesSaved++;
 
                     try {
-                        gmailService.moveEmailToLabel(emails.get(i), isSaved);
+                        gmailService.moveEmailToLabel(message, isSaved);
 
                     } catch (Exception e) {
                         logger.error("Error occurred while moving email to label.", e);
@@ -105,7 +105,7 @@ public class EmailExportService {
                     // Reporting
                     filesFailed++;
 
-                    gmailService.moveEmailToLabel(emails.get(i), isSaved);
+                    gmailService.moveEmailToLabel(message, isSaved);
                 }
 
             } catch (Exception e) {
