@@ -47,6 +47,7 @@ public class EmailExportService {
 
         // Initialize a workflow report to track the export process
         WorkflowReport workflowReport = new WorkflowReport();
+        workflowReport.setStartTime(LocalDateTime.now());
 
         if (format == null) {
             return "Format parameter is required. Use text or word.";
