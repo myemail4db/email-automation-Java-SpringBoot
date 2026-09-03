@@ -20,7 +20,7 @@ public class ExportController {
     }
     
     @GetMapping("/api/export")
-    public String getEmails(@RequestParam(required = false) String format) {
+    public String exportEmails(@RequestParam(required = false) String format) {
 
         if (format == null || format.isEmpty()) {
             format = defaultFormat;
