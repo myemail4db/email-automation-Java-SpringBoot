@@ -94,7 +94,7 @@ public class EmailExportService {
                             gmailService.moveEmailToLabel(emails.get(i), isSaved);
 
                         } catch (Exception e) {
-                            logger.error("Error occurred while moving email to label: {}", e);
+                            logger.error("Error occurred while moving email to label.", e);
                         }
 
                     } else {
