@@ -119,7 +119,6 @@ public class EmailExportService {
 
             // Reporting
             workflowReport.setZipCreated(isZipFileCreated);
-            workflowReport.setEmailSent(false); // Assuming email sending is not implemented yet
             workflowReport.setWorkflowCompleted(true);
 
             // Reporting - end time and duration
