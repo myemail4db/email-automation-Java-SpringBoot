@@ -85,8 +85,8 @@ public class EmailExportService {
             try {
 
                 EmailMessage email = emailBodyExtractorService.extractEmailMessage(message);
-                email = cleanEmailBody(email);
-                boolean isSaved = fileExportService.saveFile(email, format);                
+                EmailMessage cleanedEmail = cleanEmailBody(email);
+                boolean isSaved = fileExportService.saveFile(cleanedEmail, format);                
 
                 if (isSaved) {
 
