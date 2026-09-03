@@ -68,7 +68,7 @@ public class EmailExportService {
             System.out.println("Found " + emails.size() + " Gmail emails for " + format + " export.");
 
             // Handle case when there are no emails to export
-            if (emails.isEmpty() || emails.get(0) == null) {
+            if (emails.isEmpty()) {
                 return "No emails found to export.";
             }
 
