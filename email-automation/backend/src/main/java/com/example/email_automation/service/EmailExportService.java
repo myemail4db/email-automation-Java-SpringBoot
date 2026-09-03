@@ -128,8 +128,7 @@ public class EmailExportService {
             // Reporting - create the summary report to the browser and console
             String reportHeader = createReportHeader();
             String reportBody = createReportBody(workflowReport); 
-            reportBody = reportBody.replaceAll("\n", "<br>");
-
+            reportBody = reportBody.replace("\n", "<br>");
             return reportHeader + reportBody;
         }
 
