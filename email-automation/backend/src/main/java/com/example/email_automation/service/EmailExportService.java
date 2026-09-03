@@ -53,86 +53,86 @@ public class EmailExportService {
             return "Format parameter is required. Use text or word.";
         }
 
-        if (format.equalsIgnoreCase("text") || format.equalsIgnoreCase("word")) {
-
-            // Reporting - set the format in the workflow report
-            workflowReport.setFormat(format);
-
-            // Get recent emails from Gmail
-            List<Message> emails = gmailService.getRecentEmails();
-
-            // Reporting - emails found
-            workflowReport.setEmailsFound(emails.size());
-
-            logger.info("Found {} Gmail emails for {} export.", emails.size(), format);
-            System.out.println("Found " + emails.size() + " Gmail emails for " + format + " export.");
-
-            // Handle case when there are no emails to export
-            if (emails.isEmpty()) {
-                return "No emails found to export.";
-            }
-
-            // Initialize counters for saved and failed files
-            int filesSaved = 0;
-            int filesFailed = 0;
-
-            // Process each email
-            for (int i = 0; i < emails.size(); i++) {
-                
-                try {
-
-                    EmailMessage email = emailBodyExtractorService.extractEmailMessage(emails.get(i));
-                    email = cleanEmailBody(email);
-                    boolean isSaved = fileExportService.saveFile(email, format);                
-
-                    if (isSaved) {
-
-                        // Reporting
-                        filesSaved++;
-
-                        try {
-                            gmailService.moveEmailToLabel(emails.get(i), isSaved);
-
-                        } catch (Exception e) {
-                            logger.error("Error occurred while moving email to label.", e);
-                        }
-
-                    } else {
-
-                        // Reporting
-                        filesFailed++;
-
-                        gmailService.moveEmailToLabel(emails.get(i), isSaved);
-                    }
-
-                } catch (Exception e) {
-                    logger.error("Error occurred: " + e.getMessage(), e);
-                    throw new RuntimeException("Error occurred: " + e.getMessage(), e);
-                }
-            }
-
-            // Reporting
-            workflowReport.setFilesSaved(filesSaved);
-            workflowReport.setFilesFailed(filesFailed);
-
-            boolean isZipFileCreated = zipExportService.createZipEmail(format);
-
-            // Reporting
-            workflowReport.setZipCreated(isZipFileCreated);
-            workflowReport.setWorkflowCompleted(isZipFileCreated);
-
-            // Reporting - end time and duration
-            workflowReport.setEndTime(LocalDateTime.now());
-            workflowReport.setDuration((int) java.time.Duration.between(workflowReport.getStartTime(), workflowReport.getEndTime()).toSeconds());            
-
-            // Reporting - create the summary report to the browser and console
-            String reportHeader = createReportHeader();
-            String reportBody = createReportBody(workflowReport); 
-            reportBody = reportBody.replace("\n", "<br>");
-            return reportHeader + reportBody;
+        if (!format.equalsIgnoreCase("text") && 
+            !format.equalsIgnoreCase("word")) {
+                return "Invalid format. Use text or word.";
         }
 
-        return "Invalid format. Use text or word.";    
+        // Reporting - set the format in the workflow report
+        workflowReport.setFormat(format);
+
+        // Get recent emails from Gmail
+        List<Message> emails = gmailService.getRecentEmails();
+
+        // Reporting - emails found
+        workflowReport.setEmailsFound(emails.size());
+
+        logger.info("Found {} Gmail emails for {} export.", emails.size(), format);
+        System.out.println("Found " + emails.size() + " Gmail emails for " + format + " export.");
+
+        // Handle case when there are no emails to export
+        if (emails.isEmpty()) {
+            return "No emails found to export.";
+        }
+
+        // Initialize counters for saved and failed files
+        int filesSaved = 0;
+        int filesFailed = 0;
+
+        // Process each email
+        for (int i = 0; i < emails.size(); i++) {
+            
+            try {
+
+                EmailMessage email = emailBodyExtractorService.extractEmailMessage(emails.get(i));
+                email = cleanEmailBody(email);
+                boolean isSaved = fileExportService.saveFile(email, format);                
+
+                if (isSaved) {
+
+                    // Reporting
+                    filesSaved++;
+
+                    try {
+                        gmailService.moveEmailToLabel(emails.get(i), isSaved);
+
+                    } catch (Exception e) {
+                        logger.error("Error occurred while moving email to label.", e);
+                    }
+
+                } else {
+
+                    // Reporting
+                    filesFailed++;
+
+                    gmailService.moveEmailToLabel(emails.get(i), isSaved);
+                }
+
+            } catch (Exception e) {
+                logger.error("Error occurred: " + e.getMessage(), e);
+                throw new RuntimeException("Error occurred: " + e.getMessage(), e);
+            }
+        }
+
+        // Reporting
+        workflowReport.setFilesSaved(filesSaved);
+        workflowReport.setFilesFailed(filesFailed);
+
+        boolean isZipFileCreated = zipExportService.createZipEmail(format);
+
+        // Reporting
+        workflowReport.setZipCreated(isZipFileCreated);
+        workflowReport.setWorkflowCompleted(isZipFileCreated);
+
+        // Reporting - end time and duration
+        workflowReport.setEndTime(LocalDateTime.now());
+        workflowReport.setDuration((int) java.time.Duration.between(workflowReport.getStartTime(), workflowReport.getEndTime()).toSeconds());            
+
+        // Reporting - create the summary report to the browser and console
+        String reportHeader = createReportHeader();
+        String reportBody = createReportBody(workflowReport); 
+        reportBody = reportBody.replace("\n", "<br>");
+        return reportHeader + reportBody;
     }
 
     // Helper methods
