@@ -1,4 +1,4 @@
-# Email Automation - Java Spring Boot <!-- omit from toc -->
+# Email Automation - Java Spring Boot
 
 ![Java](https://img.shields.io/badge/Java-17-blue)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen)
@@ -6,24 +6,29 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![API](https://img.shields.io/badge/API-Gmail-red)
 
-## Table of Contents <!-- omit from toc -->
+## Table of Contents
 
-- [Overview](#overview)
-- [Workflow](#workflow)
-- [Technologies](#technologies)
-- [Current Status](#current-status)
-  - [Completed](#completed)
-  - [In Development](#in-development)
-- [Running Locally](#running-locally)
-  - [Prerequisites](#prerequisites)
-  - [Clone the Repository](#clone-the-repository)
-  - [Build the Application](#build-the-application)
-  - [Run the Application](#run-the-application)
-  - [Verify the Application](#verify-the-application)
-- [Configuration](#configuration)
-- [API](#api)
-- [Project Direction](#project-direction)
-- [Documentation](#documentation)
+- [Email Automation - Java Spring Boot](#email-automation---java-spring-boot)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Project Documentation](#project-documentation)
+  - [Workflow](#workflow)
+  - [Technologies](#technologies)
+  - [Current Status](#current-status)
+    - [Completed](#completed)
+    - [In Development](#in-development)
+  - [Running Locally](#running-locally)
+    - [Prerequisites](#prerequisites)
+    - [Clone the Repository](#clone-the-repository)
+    - [Build the Application](#build-the-application)
+    - [Run the Application](#run-the-application)
+    - [Verify the Application](#verify-the-application)
+  - [Configuration](#configuration)
+  - [API](#api)
+  - [Project Direction](#project-direction)
+  - [Documentation Source](#documentation-source)
+
+---
 
 ## Overview
 
@@ -34,6 +39,37 @@ The project originated from a recruiter-email automation process that was first 
 The Java implementation was developed as a separate solution to achieve the same core processing outcomes using a different architecture and implementation approach. It uses Java 17, Spring Boot, REST APIs, separated services, DTOs, and OAuth2 Gmail integration.
 
 The Java project is maintained as an independent application with its own architecture, source code, testing, configuration, and documentation.
+
+---
+
+## Project Documentation
+
+A documentation website is included with the project for a more detailed walkthrough of the application.
+
+It covers:
+
+* project background and evolution from the original Python implementation
+* application architecture
+* end-to-end workflow
+* engineering and implementation decisions
+* REST API endpoints
+* setup and local execution
+* current development status
+* project roadmap
+
+The documentation website starts at:
+
+```text
+docs/index.html
+```
+
+When published through GitHub Pages, the same documentation can be viewed as a website directly from the repository's GitHub Pages URL.
+
+The original Markdown documentation used as source material for the website is preserved under:
+
+```text
+docs/assets/source/
+```
 
 ---
 
@@ -91,7 +127,7 @@ The application processes emails from a user-designated Gmail label and does not
 * Final workflow reporting
 * Expanded unit test coverage
 
-See [Current Status](backend/docs/07-current-status.md) for additional implementation details.
+See the documentation website's **Current Status** page or [`docs/assets/source/06-current-status.md`](docs/assets/source/06-current-status.md) for additional implementation details.
 
 ---
 
@@ -137,7 +173,7 @@ http://localhost:8080
 curl http://localhost:8080/api/health
 ```
 
-For Google Cloud configuration, OAuth setup, credentials, redirect URI configuration, and troubleshooting, see the [Setup and Run Guide](backend/docs/06-setup-and-run-guide.md).
+For additional setup information, see the documentation website's **Setup & Run** page or [`docs/assets/source/05-setup-and-run-guide.md`](docs/assets/source/05-setup-and-run-guide.md).
 
 ---
 
@@ -152,12 +188,12 @@ backend/src/main/resources/
 For example, the export destination can be configured in `application.properties`:
 
 ```properties
-email.export.output-dir=processed_review
+email.export.export-successful=processed_review
 ```
 
 OAuth credentials and tokens contain sensitive information and should never be committed to the repository.
 
-See the [Setup and Run Guide](backend/docs/06-setup-and-run-guide.md) for detailed configuration instructions.
+See the documentation website's **Setup & Run** page for additional configuration information.
 
 ---
 
@@ -174,7 +210,7 @@ GET /api/gmail/emails
 GET /api/export
 ```
 
-See [API Endpoints](backend/docs/05-api-endpoints.md) for the current API reference.
+See the documentation website's **API** page or [`docs/assets/source/04-api-endpoints.md`](docs/assets/source/04-api-endpoints.md) for the current API reference.
 
 ---
 
@@ -195,23 +231,37 @@ After the core Java workflow is completed, possible future enhancements include:
 
 These are future possibilities and are not part of the current completed implementation.
 
-See the [Roadmap](backend/docs/08-roadmap.md) for planned development.
+See the documentation website's **Roadmap** page or [`docs/assets/source/07-roadmap.md`](docs/assets/source/07-roadmap.md) for planned development.
 
 ---
 
-## Documentation
+## Documentation Source
 
-Detailed project documentation is available under `backend/docs/`.
+The portfolio documentation website is maintained under `docs/`.
 
-| Document                                                          | Purpose                                                             |
-| ----------------------------------------------------------------- | ------------------------------------------------------------------- |
-| [Project Background](backend/docs/01-project-background.md)       | Origin of the project and relationship to the Python implementation |
-| [Architecture Overview](backend/docs/02-architecture-overview.md) | Backend architecture and component responsibilities                 |
-| [Implementation Notes](backend/docs/03-implementation-notes.md)   | Implementation decisions and development notes                      |
-| [API Endpoints](backend/docs/04-api-endpoints.md)                 | REST API reference                                                  |
-| [Setup and Run Guide](backend/docs/05-setup-and-run-guide.md)     | Detailed local setup and Gmail OAuth configuration                  |
-| [Current Status](backend/docs/06-current-status.md)               | Current implementation status                                       |
-| [Roadmap](backend/docs/07-roadmap.md)                             | Planned development and future enhancements                         |
+```text
+docs/
+├── index.html
+├── pages/
+│   ├── project-background.html
+│   ├── architecture.html
+│   ├── workflow.html
+│   ├── engineering.html
+│   ├── api.html
+│   ├── setup.html
+│   ├── status.html
+│   └── roadmap.html
+└── assets/
+    ├── css/
+    ├── js/
+    └── source/
+        ├── 01-project-background.md
+        ├── 02-architecture-overview.md
+        ├── 03-implementation-notes.md
+        ├── 04-api-endpoints.md
+        ├── 05-setup-and-run-guide.md
+        ├── 06-current-status.md
+        └── 07-roadmap.md
+```
 
----
-
+The website provides the guided project walkthrough, while the Markdown files under `docs/assets/source/` preserve the original technical documentation used as its source.
