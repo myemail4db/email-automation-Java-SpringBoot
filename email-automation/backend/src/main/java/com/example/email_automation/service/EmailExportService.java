@@ -14,7 +14,6 @@ import com.google.api.services.gmail.model.Message;
 /**
  * This service coordinates the workflow
  */
-
 @Service
 public class EmailExportService {
 
@@ -53,16 +52,23 @@ public class EmailExportService {
             return "Format parameter is required. Use text or word.";
         }
 
-        if (!format.equalsIgnoreCase("text") && 
-            !format.equalsIgnoreCase("word")) {
-                return "Invalid format. Use text or word.";
+        if (!format.equalsIgnoreCase("text")
+                && !format.equalsIgnoreCase("word")) {
+            return "Invalid format. Use text or word.";
         }
 
         // Reporting - set the format in the workflow report
         workflowReport.setFormat(format);
 
         // Get recent emails from Gmail
-        List<Message> emails = gmailService.getRecentEmails();
+        List<Message> emails;
+
+        try {
+            emails = gmailService.getRecentEmails();
+        } catch (Exception e) {
+            logger.error("Unable to retrieve emails from Gmail.", e);
+            return "Unable to retrieve emails from Gmail.";
+        }
 
         // Reporting - emails found
         workflowReport.setEmailsFound(emails.size());
@@ -81,36 +87,34 @@ public class EmailExportService {
 
         // Process each email
         for (Message message : emails) {
-            
+
             try {
 
                 EmailMessage email = emailBodyExtractorService.extractEmailMessage(message);
                 EmailMessage cleanedEmail = cleanEmailBody(email);
-                boolean isSaved = fileExportService.saveFile(cleanedEmail, format);                
+                boolean isSaved = fileExportService.saveFile(cleanedEmail, format);
 
                 if (isSaved) {
-
-                    // Reporting
                     filesSaved++;
-
-                    try {
-                        gmailService.moveEmailToLabel(message, isSaved);
-
-                    } catch (Exception e) {
-                        logger.error("Error occurred while moving email to label.", e);
-                    }
-
                 } else {
-
-                    // Reporting
                     filesFailed++;
+                }
 
+                try {
                     gmailService.moveEmailToLabel(message, isSaved);
+                } catch (Exception e) {
+                    logger.error("Error occurred while moving email to label.", e);
                 }
 
             } catch (Exception e) {
-                logger.error("Error occurred: " + e.getMessage(), e);
-                throw new RuntimeException("Error occurred: " + e.getMessage(), e);
+                filesFailed++;
+                logger.error("Error occurred while processing email.", e);
+
+                try {
+                    gmailService.moveEmailToLabel(message, false);
+                } catch (Exception labelException) {
+                    logger.error("Error occurred while moving failed email to label.", labelException);
+                }
             }
         }
 
@@ -122,15 +126,17 @@ public class EmailExportService {
 
         // Reporting
         workflowReport.setZipCreated(isZipFileCreated);
-        workflowReport.setWorkflowCompleted(isZipFileCreated);
+        workflowReport.setWorkflowCompleted(
+                isZipFileCreated && filesFailed == 0
+        );
 
         // Reporting - end time and duration
         workflowReport.setEndTime(LocalDateTime.now());
-        workflowReport.setDuration((int) java.time.Duration.between(workflowReport.getStartTime(), workflowReport.getEndTime()).toSeconds());            
+        workflowReport.setDuration((int) java.time.Duration.between(workflowReport.getStartTime(), workflowReport.getEndTime()).toSeconds());
 
         // Reporting - create the summary report to the browser and console
         String reportHeader = createReportHeader();
-        String reportBody = createReportBody(workflowReport); 
+        String reportBody = createReportBody(workflowReport);
         reportBody = reportBody.replace("\n", "<br>");
         return reportHeader + reportBody;
     }
@@ -143,13 +149,13 @@ public class EmailExportService {
     private String createReportBody(WorkflowReport workflowReport) {
         // Return a summary report of the export operation
         String reportHeader = "Export Summary:\n";
-        String exportReport = "Format: " + workflowReport.getFormat() + "\n" +
-                              "Emails found: " + workflowReport.getEmailsFound() + "\n" +
-                              "Files saved: " + workflowReport.getFilesSaved() + "\n" +
-                              "Files failed: " + workflowReport.getFilesFailed() + "\n" +
-                              "Zip file created: " + workflowReport.isZipCreated() + "\n" +
-                              "Export completed at: " + workflowReport.getEndTime() + "\n" +
-                              "Duration: " + workflowReport.getDuration() + " seconds\n";
+        String exportReport = "Format: " + workflowReport.getFormat() + "\n"
+                + "Emails found: " + workflowReport.getEmailsFound() + "\n"
+                + "Files saved: " + workflowReport.getFilesSaved() + "\n"
+                + "Files failed: " + workflowReport.getFilesFailed() + "\n"
+                + "Zip file created: " + workflowReport.isZipCreated() + "\n"
+                + "Export completed at: " + workflowReport.getEndTime() + "\n"
+                + "Duration: " + workflowReport.getDuration() + " seconds\n";
 
         // Print the export summary to the console
         logger.info(reportHeader + exportReport);

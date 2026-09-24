@@ -1,8 +1,8 @@
 package com.example.email_automation.service;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,13 +11,12 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.Message;
-import com.google.api.services.gmail.model.Profile;
 import com.google.api.services.gmail.model.ModifyMessageRequest;
+import com.google.api.services.gmail.model.Profile;
 
 /**
  * This service gets the raw emails from Gmail
  */
-
 @Service
 public class GmailService {
 
@@ -68,58 +67,54 @@ public class GmailService {
 
             // return the result
             List<Message> messages = service.users().messages()
-                .list("me")
-                .setQ("label: " + emailGmailSourceLabel)
-                .setMaxResults(5L)
-                .execute()
-                .getMessages();
+                    .list("me")
+                    .setQ("label: " + emailGmailSourceLabel)
+                    .setMaxResults(5L)
+                    .execute()
+                    .getMessages();
 
             // return the messge IDs and body
             if (messages == null) {
                 return new ArrayList<>();
-            } 
-            else {
+            } else {
                 List<Message> emailDetails = new ArrayList<>();
                 for (Message message : messages) {
                     Message fullMessage = service.users().messages()
-                        .get("me", message.getId())
-                        .execute();
+                            .get("me", message.getId())
+                            .execute();
                     emailDetails.add(fullMessage);
                 }
                 return emailDetails;
             }
 
         } catch (Exception e) {
-            // Log the error for debugging
             logger.error("Error accessing Gmail API", e);
+            throw new RuntimeException("Unable to retrieve emails from Gmail.", e);
         }
-        
-        return new ArrayList<>();
     }
 
     public void moveEmailToLabel(Message message, boolean isSuccess) throws Exception {
-    
-        // Determine the label to apply based on success or failure
-        String userId = "me";
 
         Gmail service = authService.getGmailClient();
 
-        String AddLabelId;
-        String RemoveLabelId;
+        String addLabelId;
+        String removeLabelId;
 
         if (isSuccess) {
-            AddLabelId = emailGmailSuccessLabel;
-            RemoveLabelId = emailGmailSourceLabel;
+            addLabelId = emailGmailSuccessLabel;
+            removeLabelId = emailGmailSourceLabel;
         } else {
-            AddLabelId = emailGmailFailLabel;
-            RemoveLabelId = emailGmailSourceLabel;
+            addLabelId = emailGmailFailLabel;
+            removeLabelId = emailGmailSourceLabel;
         }
 
         ModifyMessageRequest mods = new ModifyMessageRequest()
-            .setAddLabelIds(Collections.singletonList(AddLabelId))
-            .setRemoveLabelIds(Collections.singletonList(RemoveLabelId));
+                .setAddLabelIds(Collections.singletonList(addLabelId))
+                .setRemoveLabelIds(Collections.singletonList(removeLabelId));
 
-        Message response = service.users().messages().modify(userId, message.getId(), mods).execute();
+        service.users().messages()
+                .modify("me", message.getId(), mods)
+                .execute();
 
     }
 
