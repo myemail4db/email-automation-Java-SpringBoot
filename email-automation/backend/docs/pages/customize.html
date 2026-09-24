@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Customize the Application | Email Automation</title>
+<meta name="description" content="Java Spring Boot Email Automation portfolio case study">
+<link rel="stylesheet" href="../assets/css/site.css"></head>
+<body>
+<header class="topbar"><div class="topbar-inner"><a class="brand" href="../index.html">Email Automation</a>
+<nav class="toplinks"><a href="../pages/architecture.html">Architecture</a><a href="../pages/status.html">Status</a><a href="../pages/setup.html">Run locally</a></nav></div></header>
+<div class="layout">
+<aside class="sidebar">
+  <div class="label">Case Study</div>
+  <a href="../index.html">Overview</a>
+  <a href="project-background.html">Project Background</a>
+  <a href="architecture.html">Architecture</a>
+  <a href="workflow.html">Workflow</a>
+  <a href="engineering.html">Engineering Decisions</a>
+  <a href="api.html">API</a>
+  <a href="setup.html">Setup & Run</a>
+  <a href="customize.html" class="active">Customize the Application</a>
+  <a href="status.html">Current Status</a>
+  <a href="roadmap.html">Roadmap</a>
+</aside><main>
+<div class="crumbs"><a href="../index.html">Email Automation</a> &nbsp;/&nbsp; Customize the Application</div>
+<div class="kicker">Configuration reference</div>
+<h1>Customize the Application</h1>
+<p class="lead">Configure the application for your Gmail account, directories, export preferences, and delivery workflow without changing the Java source code.</p>
+
+<section class="content">
+<h2>What do you want to change?</h2>
+<table>
+<thead><tr><th>I want to...</th><th>Property</th><th>Where</th></tr></thead>
+<tbody>
+<tr><td>Process a different Gmail label</td><td><code>email.gmail.label</code></td><td><code>application.properties</code></td></tr>
+<tr><td>Change where TXT/DOCX files are saved</td><td><code>email.export.output-dir</code></td><td><code>application.properties</code></td></tr>
+<tr><td>Choose the default TXT or DOCX format</td><td><code>email.export.default-format</code></td><td><code>application.properties</code></td></tr>
+<tr><td>Change the ZIP destination</td><td><code>email.zip.export-dir</code></td><td><code>application.properties</code></td></tr>
+<tr><td>Change the sent archive directory</td><td><code>email.sent.folder.name</code></td><td><code>application.properties</code></td></tr>
+<tr><td>Set the Gmail source account</td><td><code>email.gmail.source-account</code></td><td><code>application-private.properties</code></td></tr>
+<tr><td>Set the outbound recipient</td><td><code>email.send.recipient</code></td><td><code>application-private.properties</code></td></tr>
+</tbody>
+</table>
+
+<h2>application.properties</h2>
+<p>Use this file for normal application behavior and workflow settings.</p>
+
+<h3>Gmail processing label</h3>
+<pre><code>email.gmail.label=for_friend</code></pre>
+<p>Change <code>for_friend</code> to an existing Gmail label containing the messages you want the application to process.</p>
+
+<h3>Export directory</h3>
+<pre><code>email.export.output-dir=processed_review</code></pre>
+<p>Change the value to another directory or path that the application has permission to write to.</p>
+
+<h3>Default export format</h3>
+<pre><code>email.export.default-format=text</code></pre>
+<p>Supported values documented by the current application are <code>text</code> for TXT output and <code>word</code> for DOCX output.</p>
+
+<h3>ZIP export directory</h3>
+<pre><code>email.zip.export-dir=ready_to_send</code></pre>
+<p>Controls where generated ZIP archives are written. ZIP processing is currently in development.</p>
+
+<h3>Sent archive directory</h3>
+<pre><code>email.sent.folder.name=send_archive</code></pre>
+<p>Controls the directory intended for archive handling after outbound processing. Final outbound handling is currently in development.</p>
+
+<h2>application-private.properties</h2>
+<p>Use this file for values specific to the user's email workflow.</p>
+<pre><code>email.gmail.source-account=your-email@example.com
+email.send.recipient=destination@example.com</code></pre>
+
+<h3>Source Gmail account</h3>
+<p><code>email.gmail.source-account</code> should contain the Gmail account authorized for this installation.</p>
+
+<h3>Outbound recipient</h3>
+<p><code>email.send.recipient</code> should contain the address that will receive the completed archive when outbound email delivery is completed.</p>
+
+<div class="callout"><strong>Keep private configuration private.</strong> Do not commit <code>application-private.properties</code>, OAuth client credentials, authorization tokens, access tokens, refresh tokens, passwords, or other private authentication information to Git.</div>
+
+<h2>Common configurations</h2>
+<h3>Use DOCX by default</h3>
+<pre><code>email.export.default-format=word</code></pre>
+
+<h3>Use another Gmail label</h3>
+<pre><code>email.gmail.label=my_processing_label</code></pre>
+
+<h3>Use another review directory</h3>
+<pre><code>email.export.output-dir=my_review_folder</code></pre>
+
+<h3>Send to another recipient</h3>
+<p>In <code>application-private.properties</code>:</p>
+<pre><code>email.send.recipient=destination@example.com</code></pre>
+
+<h2>Before running the application</h2>
+<ol>
+<li>Confirm the configured Gmail label exists.</li>
+<li>Confirm the source Gmail account is the account authorized through OAuth.</li>
+<li>Confirm configured directories are writable.</li>
+<li>Use <code>text</code> or <code>word</code> for the supported export format.</li>
+<li>Keep private configuration and OAuth files out of source control.</li>
+<li>Remember that ZIP and outbound email stages are still in development.</li>
+</ol>
+</section>
+<div class="next"><a href="status.html">Next: Current Status →</a></div>
+</main></div>
+<footer class="footer">Java 17 · Spring Boot · Gmail API · OAuth 2.0 · Apache POI · Maven</footer>
+<script src="../assets/js/site.js"></script></body></html>

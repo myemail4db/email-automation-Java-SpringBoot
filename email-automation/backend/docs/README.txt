@@ -10,4 +10,4 @@ Structure:
     js/
     source/   <- original Markdown documentation used as source material
 
-For GitHub Pages, place these files under the repository's docs/ directory.
+

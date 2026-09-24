@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Overview | Email Automation</title>
+<meta name="description" content="Java Spring Boot Email Automation portfolio case study">
+<link rel="stylesheet" href="assets/css/site.css"></head>
+<body>
+<header class="topbar"><div class="topbar-inner"><a class="brand" href="index.html">Email Automation</a>
+<nav class="toplinks"><a href="pages/architecture.html">Architecture</a><a href="pages/status.html">Status</a><a href="pages/setup.html">Run locally</a></nav></div></header>
+<div class="layout">
+<aside class="sidebar">
+  <div class="label">Case Study</div>
+  <a href="index.html" class="active">Overview</a>
+  <a href="pages/project-background.html">Project Background</a>
+  <a href="pages/architecture.html">Architecture</a>
+  <a href="pages/workflow.html">Workflow</a>
+  <a href="pages/engineering.html">Engineering Decisions</a>
+  <a href="pages/api.html">API</a>
+  <a href="pages/setup.html">Setup & Run</a>
+  <a href="pages/customize.html">Customize the Application</a>
+  <a href="pages/status.html">Current Status</a>
+  <a href="pages/roadmap.html">Roadmap</a>
+</aside><main>
+<section class="hero">
+<div class="eyebrow">Portfolio Case Study · Java / Spring Boot</div>
+<h1>Email Automation</h1>
+<p>A working automation project that turns a repetitive recruiter-email review process into a structured backend workflow for retrieval, filtering, document generation, archiving, and delivery.</p>
+<div class="actions"><a class="btn primary" href="pages/project-background.html">Start with the problem</a><a class="btn secondary" href="pages/architecture.html">Examine the architecture</a></div>
+</section>
+<div class="grid">
+<section class="card"><div class="kicker">Why it exists</div><h2>From manual review to a repeatable workflow</h2><p>The original process required roughly 12 hours of manual review. A Python prototype validated the automation approach and reduced the workflow to about 90 minutes. The Java version rebuilds that proven workflow using a service-oriented Spring Boot design.</p><a href="pages/project-background.html">Read the project story →</a></section>
+<section class="card"><div class="kicker">Engineering focus</div><h2>More than a file converter</h2><p>The application coordinates Gmail authentication and retrieval, content extraction, filtering, TXT/DOCX generation, ZIP processing, outbound delivery, and workflow results while keeping responsibilities separated.</p><a href="pages/engineering.html">Review engineering decisions →</a></section>
+</div>
+<section class="content"><h2>Workflow at a glance</h2>
+<div class="flow"><span class="step">Gmail label</span><span class="arrow">→</span><span class="step">Retrieve</span><span class="arrow">→</span><span class="step">Extract</span><span class="arrow">→</span><span class="step">Filter</span><span class="arrow">→</span><span class="step">TXT / DOCX</span><span class="arrow">→</span><span class="step">ZIP</span><span class="arrow">→</span><span class="step">Outbound email</span></div>
+<p class="muted">The application processes messages already placed in a designated Gmail label. It does not automatically reorganize the user's Inbox.</p></section>
+<div class="grid">
+<section class="card"><span class="status done">Completed</span><h3>Core processing</h3><p>OAuth authentication, Gmail retrieval, extraction, filtering, TXT/DOCX export, duplicate filename handling, and initial automated tests.</p></section>
+<section class="card"><span class="status dev">In development</span><h3>Version 1 completion</h3><p>ZIP workflow, outbound email delivery, and final end-to-end workflow reporting.</p></section>
+</div>
+<section class="content"><h2>Choose your path</h2><table>
+<tr><th>If you want to understand…</th><th>Go here</th></tr>
+<tr><td>The business problem and why the project was built</td><td><a href="pages/project-background.html">Project Background</a></td></tr>
+<tr><td>How the Spring Boot components fit together</td><td><a href="pages/architecture.html">Architecture</a></td></tr>
+<tr><td>The actual end-to-end processing sequence</td><td><a href="pages/workflow.html">Workflow</a></td></tr>
+<tr><td>Design choices, defensive processing, and testing</td><td><a href="pages/engineering.html">Engineering Decisions</a></td></tr>
+<tr><td>How to run and inspect the application</td><td><a href="pages/setup.html">Setup & Run</a></td></tr>
+<tr><td>What works today and what comes next</td><td><a href="pages/status.html">Current Status</a> and <a href="pages/roadmap.html">Roadmap</a></td></tr>
+</table></section>
+</main></div>
+<footer class="footer">Java 17 · Spring Boot · Gmail API · OAuth 2.0 · Apache POI · Maven</footer>
+<script src="assets/js/site.js"></script></body></html>

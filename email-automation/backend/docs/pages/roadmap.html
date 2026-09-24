@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Roadmap | Email Automation</title>
+<meta name="description" content="Java Spring Boot Email Automation portfolio case study">
+<link rel="stylesheet" href="../assets/css/site.css"></head>
+<body>
+<header class="topbar"><div class="topbar-inner"><a class="brand" href="../index.html">Email Automation</a>
+<nav class="toplinks"><a href="../pages/architecture.html">Architecture</a><a href="../pages/status.html">Status</a><a href="../pages/setup.html">Run locally</a></nav></div></header>
+<div class="layout">
+<aside class="sidebar">
+  <div class="label">Case Study</div>
+  <a href="../index.html">Overview</a>
+  <a href="project-background.html">Project Background</a>
+  <a href="architecture.html">Architecture</a>
+  <a href="workflow.html">Workflow</a>
+  <a href="engineering.html">Engineering Decisions</a>
+  <a href="api.html">API</a>
+  <a href="setup.html">Setup & Run</a>
+  <a href="customize.html">Customize the Application</a>
+  <a href="status.html">Current Status</a>
+  <a href="roadmap.html" class="active">Roadmap</a>
+</aside><main><div class="crumbs"><a href="../index.html">Email Automation</a> &nbsp;/&nbsp; Roadmap</div>
+<div class="kicker">What comes next</div><h1>Roadmap</h1>
+<section class="content"><h2>Version 1 finish line</h2><p>Version 1 is complete when the full Java workflow can run successfully from Gmail retrieval through outbound delivery and return a useful final report.</p>
+<h3>1. Complete ZIP processing</h3><p>Verify file selection, TXT/DOCX archive behavior, destination handling, duplicate ZIP filenames, resource cleanup, error handling, and workflow integration.</p>
+<h3>2. Complete outbound email</h3><p>Reuse the Gmail authentication architecture, construct the outbound message, attach the generated archive, send it to the configured destination, and return the result to the workflow.</p>
+<h3>3. Complete workflow reporting</h3><p>Accumulate stage results as processing occurs: emails found, files saved/failed, ZIP result, delivery result, and overall completion.</p>
+<h3>4. Expand representative tests</h3><p>Add focused coverage around integration boundaries and complete orchestration without turning the project into a test-count exercise.</p>
+<h2>Post-Version 1 possibilities</h2><ul><li>React-based filtering, preview, and user review</li><li>Security hardening and stronger credential protection</li><li>Protected ZIP archives</li><li>Secure backup and recovery</li><li>Workflow monitoring and execution history</li><li>Additional email provider support</li></ul>
+<h2>Development principles</h2><ul><li>Preserve clear service responsibilities.</li><li>Keep the primary business workflow understandable.</li><li>Keep provider integrations separated from internal processing.</li><li>Maintain user control over Gmail messages.</li><li>Document functionality as completed only after implementation and verification.</li></ul></section>
+</main></div>
+<footer class="footer">Java 17 · Spring Boot · Gmail API · OAuth 2.0 · Apache POI · Maven</footer>
+<script src="../assets/js/site.js"></script></body></html>

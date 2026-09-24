@@ -1,0 +1,41 @@
+
+:root{
+  --bg:#f5f7fa;--panel:#fff;--ink:#172033;--muted:#5c667a;--line:#dfe5ec;
+  --nav:#101827;--nav2:#172238;--accent:#2764c7;--soft:#edf4ff;--good:#18794e;
+  --warn:#9a6700;--planned:#667085;--max:1180px
+}
+*{box-sizing:border-box} html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.65}
+a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+.topbar{background:var(--nav);color:#fff;border-bottom:1px solid #26334a;position:sticky;top:0;z-index:20}
+.topbar-inner{max-width:var(--max);margin:auto;display:flex;align-items:center;justify-content:space-between;padding:14px 24px;gap:20px}
+.brand{color:#fff;font-weight:750;letter-spacing:.1px}.brand:hover{text-decoration:none}
+.toplinks{display:flex;gap:18px;font-size:14px}.toplinks a{color:#d8e2f0}
+.layout{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:255px minmax(0,1fr);gap:32px;padding:32px 24px 60px}
+.sidebar{position:sticky;top:78px;align-self:start;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+.sidebar .label{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700;margin:0 0 10px}
+.sidebar a{display:block;padding:8px 10px;border-radius:7px;color:#344054;font-size:14px}
+.sidebar a.active,.sidebar a:hover{background:var(--soft);color:#174ea6;text-decoration:none}
+main{min-width:0}.crumbs{font-size:13px;color:var(--muted);margin-bottom:18px}.crumbs a{color:#475467}
+.hero{background:linear-gradient(135deg,#101827,#213659);color:#fff;border-radius:14px;padding:46px 48px;margin-bottom:28px}
+.hero .eyebrow{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:#b9cae7;font-weight:700}
+.hero h1{font-size:42px;line-height:1.12;margin:10px 0 14px}.hero p{max-width:760px;color:#dce6f5;font-size:18px;margin:0}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}.btn{display:inline-block;border-radius:8px;padding:10px 15px;font-weight:650;font-size:14px}
+.btn.primary{background:#fff;color:#14213a}.btn.secondary{border:1px solid #7184a3;color:#fff}
+.btn:hover{text-decoration:none;filter:brightness(.98)}
+.card,.content{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:26px;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.grid .card{margin:0}
+h1,h2,h3{line-height:1.25}h1{font-size:34px;margin:.2em 0 .45em}h2{font-size:24px;margin:1.5em 0 .55em}h3{font-size:18px;margin:1.25em 0 .4em}
+p{margin:.6em 0 1em}ul,ol{padding-left:22px}
+.kicker{color:var(--accent);font-weight:750;font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+.metric{font-size:30px;font-weight:800;color:#173b73}.muted{color:var(--muted)}
+.status{display:inline-flex;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:700}
+.done{background:#eaf7f0;color:var(--good)}.dev{background:#fff4d6;color:var(--warn)}.plan{background:#f2f4f7;color:var(--planned)}
+code{background:#f1f4f8;padding:2px 5px;border-radius:4px;font-size:.92em}
+pre{background:#111827;color:#e5edf7;padding:18px;border-radius:8px;overflow:auto;line-height:1.5}
+pre code{background:none;padding:0}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:18px 0}.step{background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;font-weight:650}.arrow{color:#98a2b3}
+table{width:100%;border-collapse:collapse;margin:14px 0 22px;font-size:14px}th,td{border-bottom:1px solid var(--line);padding:11px 10px;text-align:left;vertical-align:top}th{background:#f8fafc}
+.callout{border-left:4px solid var(--accent);background:#f6f9ff;padding:14px 18px;border-radius:0 8px 8px 0;margin:18px 0}
+.footer{max-width:var(--max);margin:0 auto;padding:0 24px 36px;color:var(--muted);font-size:13px}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.sidebar{position:static}.toplinks{display:none}.hero{padding:32px 26px}.hero h1{font-size:34px}.grid{grid-template-columns:1fr}}

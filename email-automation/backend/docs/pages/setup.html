@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Setup & Run | Email Automation</title>
+<meta name="description" content="Java Spring Boot Email Automation portfolio case study">
+<link rel="stylesheet" href="../assets/css/site.css"></head>
+<body>
+<header class="topbar"><div class="topbar-inner"><a class="brand" href="../index.html">Email Automation</a>
+<nav class="toplinks"><a href="../pages/architecture.html">Architecture</a><a href="../pages/status.html">Status</a><a href="../pages/setup.html">Run locally</a></nav></div></header>
+<div class="layout">
+<aside class="sidebar">
+  <div class="label">Case Study</div>
+  <a href="../index.html">Overview</a>
+  <a href="project-background.html">Project Background</a>
+  <a href="architecture.html">Architecture</a>
+  <a href="workflow.html">Workflow</a>
+  <a href="engineering.html">Engineering Decisions</a>
+  <a href="api.html">API</a>
+  <a href="setup.html" class="active">Setup & Run</a>
+  <a href="customize.html">Customize the Application</a>
+  <a href="status.html">Current Status</a>
+  <a href="roadmap.html">Roadmap</a>
+</aside><main><div class="crumbs"><a href="../index.html">Email Automation</a> &nbsp;/&nbsp; Setup & Run</div>
+<div class="kicker">Developer guide</div><h1>Setup & Run</h1>
+<section class="content"><h2>Prerequisites</h2><ul><li>Java 17</li><li>Maven</li><li>Git</li><li>A Google account</li><li>A Google Cloud project with Gmail API enabled</li><li>OAuth credentials for Gmail API access</li></ul>
+<h2>Clone and run</h2><pre><code>git clone &lt;repository-url&gt;
+cd email-automation/backend
+
+mvn clean compile
+mvn spring-boot:run</code></pre>
+<p>The application runs locally at <code>http://localhost:8080</code>.</p>
+<h2>Verify the backend</h2><pre><code>curl http://localhost:8080/api/health</code></pre>
+<h2>Application configuration</h2><p>Spring Boot configuration is stored under <code>backend/src/main/resources/</code>. For example:</p>
+<pre><code>email.export.output-dir=processed_review</code></pre>
+<h2>OAuth safety</h2><div class="callout"><strong>Do not commit credentials or tokens.</strong> Gmail OAuth client credentials, access tokens, and refresh tokens contain sensitive information and should remain outside source control.</div>
+<h2>Documentation website</h2><p>Open <code>docs/index.html</code> in a browser. It is intentionally the only HTML file directly under <code>docs/</code>; supporting pages are kept in <code>docs/pages/</code> so the starting point is obvious.</p></section>
+</main></div>
+<footer class="footer">Java 17 · Spring Boot · Gmail API · OAuth 2.0 · Apache POI · Maven</footer>
+<script src="../assets/js/site.js"></script></body></html>

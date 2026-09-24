@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Engineering Decisions | Email Automation</title>
+<meta name="description" content="Java Spring Boot Email Automation portfolio case study">
+<link rel="stylesheet" href="../assets/css/site.css"></head>
+<body>
+<header class="topbar"><div class="topbar-inner"><a class="brand" href="../index.html">Email Automation</a>
+<nav class="toplinks"><a href="../pages/architecture.html">Architecture</a><a href="../pages/status.html">Status</a><a href="../pages/setup.html">Run locally</a></nav></div></header>
+<div class="layout">
+<aside class="sidebar">
+  <div class="label">Case Study</div>
+  <a href="../index.html">Overview</a>
+  <a href="project-background.html">Project Background</a>
+  <a href="architecture.html">Architecture</a>
+  <a href="workflow.html">Workflow</a>
+  <a href="engineering.html" class="active">Engineering Decisions</a>
+  <a href="api.html">API</a>
+  <a href="setup.html">Setup & Run</a>
+  <a href="customize.html">Customize the Application</a>
+  <a href="status.html">Current Status</a>
+  <a href="roadmap.html">Roadmap</a>
+</aside><main><div class="crumbs"><a href="../index.html">Email Automation</a> &nbsp;/&nbsp; Engineering Decisions</div>
+<div class="kicker">Implementation choices</div><h1>Engineering Decisions</h1>
+<section class="content"><h2>Service separation</h2><p>External API access, content processing, file handling, archiving, and delivery are separated instead of being embedded in controllers. Controllers remain focused on HTTP interaction while services perform the work.</p>
+<h2>Defensive processing</h2><p>The workflow checks common failure conditions including missing export formats, null service results, empty email collections, invalid content, and failed file saves. The goal is a meaningful workflow result instead of an uncontrolled failure.</p>
+<h2>Duplicate filenames</h2><p>Generated files use readable job-oriented names. When a filename already exists, the export logic adds a numeric suffix rather than overwriting the existing file.</p>
+<h2>Resource handling</h2><p>File and ZIP operations use scoped resource management so streams are closed reliably even when processing fails.</p>
+<h2>Testing strategy</h2><p>JUnit 5 and Mockito are used for representative automated testing. Current tests cover Spring context loading, dependency mocking, defensive behavior, and successful workflow behavior. Planned coverage targets important boundaries such as Gmail retrieval, filtering, file processing, ZIP creation, outbound delivery, and orchestration.</p>
+<h2>Security posture</h2><p>OAuth credentials, access tokens, refresh tokens, and other sensitive configuration should not be committed to source control. Logging should provide useful operational detail without exposing Gmail or OAuth secrets. Additional credential protection, archive protection, integrity checks, and recovery controls are roadmap items.</p></section>
+</main></div>
+<footer class="footer">Java 17 · Spring Boot · Gmail API · OAuth 2.0 · Apache POI · Maven</footer>
+<script src="../assets/js/site.js"></script></body></html>
