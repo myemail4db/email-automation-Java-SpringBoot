@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gmail &amp; OAuth Setup | Email Automation</title>
+<meta name="description" content="Java Spring Boot Email Automation portfolio case study">
+<link rel="stylesheet" href="../assets/css/site.css"></head>
+<body>
+<header class="topbar"><div class="topbar-inner"><a class="brand" href="../index.html">Email Automation</a>
+<nav class="toplinks"><a href="../pages/architecture.html">Architecture</a><a href="../pages/status.html">Status</a><a href="../pages/setup.html">Run locally</a></nav></div></header>
+<div class="layout">
+<aside class="sidebar">
+  <div class="label">Case Study</div>
+  <a href="../index.html">Overview</a>
+  <a href="project-background.html">Project Background</a>
+  <a href="architecture.html">Architecture</a>
+  <a href="workflow.html">Workflow</a>
+  <a href="engineering.html">Engineering Decisions</a>
+  <a href="api.html">API</a>
+  <a href="setup.html">Setup & Run</a>
+  <a href="gmail-oauth.html" class="active">Gmail & OAuth Setup</a>
+  <a href="customize.html">Customize the Application</a>
+  <a href="status.html">Current Status</a>
+  <a href="roadmap.html">Roadmap</a>
+</aside><main><div class="crumbs"><a href="../index.html">Email Automation</a> &nbsp;/&nbsp; <a href="setup.html">Setup &amp; Run</a> &nbsp;/&nbsp; Gmail &amp; OAuth Setup</div>
+<div class="kicker">Authentication guide</div><h1>Gmail &amp; OAuth Setup</h1>
+<p class="lead">Set up Google Cloud, create the desktop OAuth client, place the downloaded credentials where this application actually expects them, authorize Gmail, and verify each layer before running the full workflow.</p>
+<section class="content">
+<h2>Before you start</h2>
+<p>You need a Google account with Gmail enabled and a Google Cloud project. This application requests Gmail read-only and Gmail send access. The OAuth client type used by this project is a <strong>Desktop app</strong>.</p>
+<div class="callout"><strong>Important:</strong> Never commit <code>credentials.json</code>, the generated <code>tokens/</code> directory, or <code>application-private.properties</code>. The project <code>.gitignore</code> is configured to exclude them.</div>
+
+<h2>1. Create or select a Google Cloud project</h2>
+<ol><li>Open the Google Cloud Console.</li><li>Create a new project or select the project you want to use for Email Automation.</li><li>Keep this project selected while completing the remaining Google configuration.</li></ol>
+
+<h2>2. Enable the Gmail API</h2>
+<ol><li>In Google Cloud, open the API Library.</li><li>Search for <strong>Gmail API</strong>.</li><li>Open Gmail API and select <strong>Enable</strong>.</li></ol>
+<p>If Gmail API is not enabled for the selected Cloud project, OAuth may succeed but Gmail API requests will not work as expected.</p>
+
+<h2>3. Configure Google Auth Platform</h2>
+<p>Google currently manages OAuth application settings under <strong>Google Auth Platform</strong>. Open <strong>Branding</strong>. If the platform has not been configured, select <strong>Get Started</strong>.</p>
+<ol><li>Enter an application name, such as <code>Email Automation</code>.</li><li>Select a user support email.</li><li>Choose the audience for the application.</li><li>Enter the developer/contact email requested by Google.</li><li>Review and save the configuration.</li></ol>
+<div class="callout"><strong>Personal Gmail account?</strong> Use an <strong>External</strong> audience. While the application is in testing, open <strong>Audience → Test users</strong> and add the Gmail account that will authorize the application. <strong>Internal</strong> is intended for users inside a Google Workspace organization.</div>
+
+<h2>4. Review the Gmail permissions</h2>
+<p>The current Java authentication service requests these Gmail permissions:</p>
+<ul><li><strong>Gmail read-only</strong> — used to retrieve and read messages selected for processing.</li><li><strong>Gmail send</strong> — used by the outbound email stage.</li></ul>
+<p>For an External application, use Google Auth Platform → <strong>Data Access</strong> to configure the authorization scopes required by the application when needed by the Google Auth setup.</p>
+
+<h2>5. Create a Desktop OAuth client</h2>
+<ol><li>Open <strong>Google Auth Platform → Clients</strong>.</li><li>Select <strong>Create Client</strong>.</li><li>For Application type, select <strong>Desktop app</strong>.</li><li>Give the client a recognizable name.</li><li>Select <strong>Create</strong>.</li><li>Download the JSON credentials file.</li></ol>
+<p>This application uses Google's installed/desktop application authorization flow. Do not create a Web application client for these instructions.</p>
+
+<h2>6. Rename and place credentials.json</h2>
+<p>Rename the downloaded OAuth client file to exactly:</p>
+<pre><code>credentials.json</code></pre>
+<p>Place it here:</p>
+<pre><code>email-automation-Java-SpringBoot/
+└── backend/
+    └── src/
+        └── main/
+            └── resources/
+                ├── application.properties
+                ├── application-private.properties
+                └── credentials.json   &lt;-- put it here</code></pre>
+<div class="callout"><strong>Why this exact location?</strong> <code>GmailAuthService</code> loads <code>/credentials.json</code> as a classpath resource. With the current Maven/Spring Boot layout, <code>backend/src/main/resources/credentials.json</code> is the source location that makes the file available at that classpath path.</div>
+<p><strong>Do not</strong> put it in <code>backend/config/</code>. The current exception text mentions a “config directory,” but the implementation actually loads the file from the classpath root.</p>
+
+<h2>7. Create application-private.properties</h2>
+<p>In the same resources directory, create or update:</p>
+<pre><code>backend/src/main/resources/application-private.properties</code></pre>
+<p>Use your own addresses:</p>
+<pre><code>email.gmail.source-account=your-gmail-address@example.com
+email.send.recipient=destination-address@example.com</code></pre>
+<p><code>application.properties</code> imports this private file with <code>spring.config.import=optional:classpath:application-private.properties</code>.</p>
+
+<h2>8. Configure the Gmail labels</h2>
+<p>The current application uses three Gmail label properties:</p>
+<pre><code>email.gmail.source-label=for_friend
+email.gmail.success-label=for_friend/processed_review
+email.gmail.fail-label=for_friend/error</code></pre>
+<p>Create matching labels in Gmail or change these values to labels that already exist in your account. The source label identifies the messages the workflow should process.</p>
+
+<h2>9. Start the application</h2>
+<p>From the <code>backend</code> directory:</p>
+<pre><code>mvn clean compile
+mvn spring-boot:run</code></pre>
+<p>Spring Boot runs on:</p><pre><code>http://localhost:8080</code></pre>
+<p>First verify Spring Boot itself:</p><pre><code>curl http://localhost:8080/api/health</code></pre>
+
+<h2>10. Trigger Gmail authorization</h2>
+<p>Call the Gmail status endpoint:</p>
+<pre><code>curl http://localhost:8080/api/gmail/status</code></pre>
+<p>On the first Gmail authorization, the application uses a local OAuth callback receiver on <strong>port 8888</strong>. Your browser should open or Google should prompt you to sign in and approve the requested Gmail permissions.</p>
+<ol><li>Choose the Gmail account that matches your configuration.</li><li>Review the permissions requested by Email Automation.</li><li>Approve access.</li><li>Allow the browser to return to the local callback.</li></ol>
+
+<h2>11. Where the token is stored</h2>
+<p>You do not manually create the OAuth token. After successful authorization, the Google OAuth library stores authorization data in:</p>
+<pre><code>tokens/</code></pre>
+<p>The path is relative to the application's current working directory. If you start Maven from <code>backend/</code>, the normal location is:</p>
+<pre><code>email-automation-Java-SpringBoot/
+└── backend/
+    ├── tokens/          &lt;-- generated automatically
+    └── src/
+        └── main/
+            └── resources/
+                └── credentials.json</code></pre>
+<div class="callout"><strong>Running from an IDE?</strong> The IDE can use a different working directory. If you cannot find <code>tokens/</code>, check the IDE's configured working directory. The code uses the relative path <code>tokens</code>.</div>
+
+<h2>12. Verify Gmail retrieval</h2>
+<p>After OAuth succeeds, test message retrieval separately from the full export workflow:</p>
+<pre><code>curl http://localhost:8080/api/gmail/emails</code></pre>
+<p>If this works, Gmail authentication, the Gmail API, the configured account, and label lookup are far enough along to proceed to export.</p>
+
+<h2>13. Run the export workflow</h2>
+<p>TXT:</p><pre><code>curl "http://localhost:8080/api/export?format=text"</code></pre>
+<p>DOCX:</p><pre><code>curl "http://localhost:8080/api/export?format=word"</code></pre>
+
+<h2>Verification checkpoints</h2>
+<table><thead><tr><th>What are you testing?</th><th>Check</th><th>If it fails</th></tr></thead><tbody>
+<tr><td>Spring Boot</td><td><code>/api/health</code></td><td>Check Java, Maven, startup errors, and port 8080.</td></tr>
+<tr><td>OAuth + Gmail client</td><td><code>/api/gmail/status</code></td><td>Check Google Cloud, credentials.json, test user, token, and port 8888.</td></tr>
+<tr><td>Gmail retrieval</td><td><code>/api/gmail/emails</code></td><td>Check source account, Gmail labels, permissions, and whether messages exist.</td></tr>
+<tr><td>Processing/export</td><td><code>/api/export?format=text</code></td><td>Check export format, directories, retrieval, and application logs.</td></tr>
+</tbody></table>
+
+<h2>Start here when something goes wrong</h2>
+<h3>“Resource not found: /credentials.json”</h3>
+<p><strong>Likely cause:</strong> the OAuth client JSON is missing, has the wrong filename, or is in the wrong directory.</p>
+<p><strong>Fix:</strong> confirm the file is named exactly <code>credentials.json</code> and is located at <code>backend/src/main/resources/credentials.json</code>. Restart the application after correcting it.</p>
+
+<h3>The browser never opens or authorization does not complete</h3>
+<p><strong>Check:</strong> first call a Gmail endpoint such as <code>/api/gmail/status</code>. The Gmail client is what triggers authorization. Also check the console for OAuth errors and make sure local port <code>8888</code> is available.</p>
+
+<h3>Port 8888 is already in use</h3>
+<p><strong>Cause:</strong> the OAuth callback receiver is hard-coded to port <code>8888</code> in the current authentication service.</p>
+<p><strong>Fix:</strong> stop the process using port 8888, then retry authorization. Changing the callback port requires a code change in the current implementation.</p>
+
+<h3>“Access blocked,” “access denied,” or the account cannot authorize</h3>
+<p><strong>Check:</strong> for an External app still in testing, make sure the Gmail account is listed under Google Auth Platform → Audience → Test users. Also confirm you are signing in with that same account.</p>
+
+<h3>“This app isn't verified”</h3>
+<p>During development, Google can display an unverified-app warning when sensitive Gmail scopes are requested. Only continue when you created/trust the Google Cloud project and understand the permissions being requested. Public distribution can require Google verification.</p>
+
+<h3>401 / invalid credentials / token problems</h3>
+<p><strong>Check:</strong> confirm the OAuth client is still valid and that the generated token belongs to the intended client/account. Do not casually delete token data. If you intentionally changed OAuth clients or scopes and need to reauthorize, first stop the application, preserve anything you need for diagnosis, then remove the local generated <code>tokens/</code> directory and run the Gmail authorization flow again.</p>
+
+<h3>403 / Gmail API request rejected</h3>
+<p><strong>Check:</strong> make sure Gmail API is enabled in the same Google Cloud project that owns the OAuth client, and make sure the authorized account granted the permissions requested by the application.</p>
+
+<h3>Gmail label not found</h3>
+<p><strong>Check:</strong> compare the labels in Gmail with <code>email.gmail.source-label</code>, <code>email.gmail.success-label</code>, and <code>email.gmail.fail-label</code>. Spelling and hierarchy must match the labels used by your account.</p>
+
+<h3>No emails are returned</h3>
+<p>Verify that <code>/api/gmail/status</code> works first. Then confirm the configured source label exists and actually contains messages. This separates an OAuth problem from a label/data problem.</p>
+
+<h3>application-private.properties is not being loaded</h3>
+<p>Confirm it is named exactly <code>application-private.properties</code> and placed under <code>backend/src/main/resources/</code>. The main properties file imports it from the classpath. It is intentionally excluded from Git, so a fresh clone will require each user to create their own local copy.</p>
+
+<h3>Where should I look for details?</h3>
+<p>The application writes logs to:</p><pre><code>logs/email-automation.log</code></pre>
+<p>Use the log together with the verification checkpoints above to identify whether the failure is Spring Boot, OAuth, Gmail retrieval, or export processing.</p>
+</section>
+<div class="next"><a href="customize.html">Next: Customize the Application →</a></div></main></div>
+<footer class="footer">Java 17 · Spring Boot · Gmail API · OAuth 2.0 · Apache POI · Maven</footer>
+<script src="../assets/js/site.js"></script></body></html>

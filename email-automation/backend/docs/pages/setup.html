@@ -16,23 +16,33 @@
   <a href="engineering.html">Engineering Decisions</a>
   <a href="api.html">API</a>
   <a href="setup.html" class="active">Setup & Run</a>
+  <a href="gmail-oauth.html">Gmail & OAuth Setup</a>
   <a href="customize.html">Customize the Application</a>
   <a href="status.html">Current Status</a>
   <a href="roadmap.html">Roadmap</a>
-</aside><main><div class="crumbs"><a href="../index.html">Email Automation</a> &nbsp;/&nbsp; Setup & Run</div>
-<div class="kicker">Developer guide</div><h1>Setup & Run</h1>
-<section class="content"><h2>Prerequisites</h2><ul><li>Java 17</li><li>Maven</li><li>Git</li><li>A Google account</li><li>A Google Cloud project with Gmail API enabled</li><li>OAuth credentials for Gmail API access</li></ul>
-<h2>Clone and run</h2><pre><code>git clone &lt;repository-url&gt;
-cd email-automation/backend
-
-mvn clean compile
-mvn spring-boot:run</code></pre>
-<p>The application runs locally at <code>http://localhost:8080</code>.</p>
-<h2>Verify the backend</h2><pre><code>curl http://localhost:8080/api/health</code></pre>
-<h2>Application configuration</h2><p>Spring Boot configuration is stored under <code>backend/src/main/resources/</code>. For example:</p>
-<pre><code>email.export.output-dir=processed_review</code></pre>
-<h2>OAuth safety</h2><div class="callout"><strong>Do not commit credentials or tokens.</strong> Gmail OAuth client credentials, access tokens, and refresh tokens contain sensitive information and should remain outside source control.</div>
-<h2>Documentation website</h2><p>Open <code>docs/index.html</code> in a browser. It is intentionally the only HTML file directly under <code>docs/</code>; supporting pages are kept in <code>docs/pages/</code> so the starting point is obvious.</p></section>
-</main></div>
+</aside><main><div class="crumbs"><a href="../index.html">Email Automation</a> &nbsp;/&nbsp; Setup &amp; Run</div>
+<div class="kicker">Developer guide</div><h1>Setup &amp; Run</h1>
+<p class="lead">From a fresh clone to a verified local workflow. Complete the steps in order so each layer can be tested before moving to the next.</p>
+<section class="content">
+<h2>1. Prerequisites</h2><ul><li>Java 17</li><li>Maven</li><li>Git</li><li>A Google account with Gmail</li><li>A Google Cloud project</li></ul>
+<h2>2. Clone the project</h2><pre><code>git clone &lt;repository-url&gt;
+cd email-automation-Java-SpringBoot/backend</code></pre>
+<h2>3. Set up Gmail OAuth</h2><p>This is required before Gmail endpoints can work. The guide covers Google Cloud, Gmail API, OAuth consent, Desktop credentials, the exact <code>credentials.json</code> location, private properties, first authorization, generated tokens, and troubleshooting.</p>
+<p><a class="btn primary" href="gmail-oauth.html">Open Gmail &amp; OAuth Setup →</a></p>
+<h2>4. Review application configuration</h2><p>Configure Gmail labels, local directories, ZIP naming, default export format, source account, and recipient before running the workflow.</p>
+<p><a href="customize.html">Customize the Application →</a></p>
+<h2>5. Build and run</h2><pre><code>mvn clean compile
+mvn spring-boot:run</code></pre><p>The application runs at <code>http://localhost:8080</code>.</p>
+<h2>6. Verify one layer at a time</h2><table><thead><tr><th>Step</th><th>Command</th></tr></thead><tbody>
+<tr><td>Spring Boot</td><td><code>curl http://localhost:8080/api/health</code></td></tr>
+<tr><td>Gmail OAuth/connectivity</td><td><code>curl http://localhost:8080/api/gmail/status</code></td></tr>
+<tr><td>Gmail retrieval</td><td><code>curl http://localhost:8080/api/gmail/emails</code></td></tr>
+<tr><td>TXT workflow</td><td><code>curl "http://localhost:8080/api/export?format=text"</code></td></tr>
+<tr><td>DOCX workflow</td><td><code>curl "http://localhost:8080/api/export?format=word"</code></td></tr>
+</tbody></table>
+<div class="callout"><strong>Use HTTP locally.</strong> The current Spring Boot development server is configured on port 8080 without local HTTPS configuration, so use <code>http://localhost:8080</code>.</div>
+<h2>7. If something fails</h2><p>Start with the first verification checkpoint that fails. The <a href="gmail-oauth.html">Gmail &amp; OAuth Setup</a> page includes symptom-based troubleshooting for credentials, test users, authorization, tokens, ports, labels, 401/403 responses, and private configuration.</p>
+<h2>Documentation website</h2><p>Open <code>docs/index.html</code> in a browser. Supporting pages are under <code>docs/pages/</code>.</p>
+</section><div class="next"><a href="gmail-oauth.html">Next: Gmail &amp; OAuth Setup →</a></div></main></div>
 <footer class="footer">Java 17 · Spring Boot · Gmail API · OAuth 2.0 · Apache POI · Maven</footer>
 <script src="../assets/js/site.js"></script></body></html>
