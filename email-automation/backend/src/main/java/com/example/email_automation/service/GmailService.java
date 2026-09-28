@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.api.services.gmail.Gmail;
+import com.google.api.services.gmail.model.Label;
 import com.google.api.services.gmail.model.Message;
 import com.google.api.services.gmail.model.ModifyMessageRequest;
 import com.google.api.services.gmail.model.Profile;
@@ -101,11 +102,11 @@ public class GmailService {
         String removeLabelId;
 
         if (isSuccess) {
-            addLabelId = emailGmailSuccessLabel;
-            removeLabelId = emailGmailSourceLabel;
+            addLabelId = getLabelId(service, emailGmailSuccessLabel);
+            removeLabelId = getLabelId(service, emailGmailSourceLabel);
         } else {
-            addLabelId = emailGmailFailLabel;
-            removeLabelId = emailGmailSourceLabel;
+            addLabelId = getLabelId(service, emailGmailFailLabel);
+            removeLabelId = getLabelId(service, emailGmailSourceLabel);
         }
 
         ModifyMessageRequest mods = new ModifyMessageRequest()
@@ -118,4 +119,20 @@ public class GmailService {
 
     }
 
+    private String getLabelId(Gmail service, String labelName) throws Exception {
+
+        List<Label> labels = service.users()
+                .labels()
+                .list("me")
+                .execute().getLabels();
+
+        for (Label label : labels) {
+            if (labelName.equals(label.getName())) {
+                return label.getId();
+            }
+        }
+        throw new IllegalArgumentException(
+                "Gmail label not found: " + labelName
+        );
+    }
 }

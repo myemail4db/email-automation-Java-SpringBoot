@@ -30,7 +30,7 @@ public class ZipExportService {
     @Value("${email.files.zip-prefix}")
     private String zipFilesZipPrefix;
 
-    public boolean createZipEmail(String format) {
+    public Path createZipEmail(String format) {
 
         String extension;
         
@@ -39,7 +39,7 @@ public class ZipExportService {
         } else if(format.equals("word")) {
             extension = ".docx";
         } else {
-            return false;
+            return null;
         } 
 
         try {
@@ -50,11 +50,18 @@ public class ZipExportService {
             // create the zip filename with path
             Path zipFile = createZipPath(Path.of(zipFilesZipDir), format);
             
-            return addFiles(zipFile, extension);
+            boolean zipCreated = addFiles(zipFile, extension);
+
+            if (zipCreated) {
+                return zipFile;
+            }
+
+            Files.deleteIfExists(zipFile);
+            return null;
 
         } catch (IOException e) {
             logger.error("Failed to create ZIP export.", e);
-            return false;
+            return null;
         }
 
     }
@@ -83,11 +90,15 @@ public class ZipExportService {
 
     private boolean addFiles(Path zipFile, String extension) {
 
+        // Open the directory stream to read files from the processed directory
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Path.of(emailFilesProcessedDir))) {
 
+            // Create the ZIP output stream to write to the zip file
             try (OutputStream os = Files.newOutputStream(zipFile, StandardOpenOption.CREATE);
                  ZipOutputStream zos = new ZipOutputStream(os);) {
                 
+                int filesAdded = 0;
+
                 for (Path file : stream) {
                     
                     if (!Files.isRegularFile(file)) {
@@ -112,16 +123,24 @@ public class ZipExportService {
                     
                     // Close the current entry
                     zos.closeEntry();
+                    filesAdded++;
                     
                 }
 
-                return true;
+                return filesAdded > 0;
 
-            }
             } catch (IOException e) {
                 logger.error("Failed to create ZIP export.", e);
                 return false;
             }
+
+        } catch (IOException e) {
+            logger.error(
+                    "Failed to access processed files directory: {}",
+                    emailFilesProcessedDir,
+                    e);
+            return false;
+        }
     }
 
     //String date = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());

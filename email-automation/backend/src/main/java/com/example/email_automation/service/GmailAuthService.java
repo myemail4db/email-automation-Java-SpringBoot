@@ -32,6 +32,7 @@ public class GmailAuthService {
     // Scopes define what the app can do (e.g., read, send emails)
     private static final List<String> SCOPES = List.of(
         GmailScopes.GMAIL_READONLY,
+        GmailScopes.GMAIL_MODIFY,
         GmailScopes.GMAIL_SEND
     );
 

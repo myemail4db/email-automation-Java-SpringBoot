@@ -24,21 +24,18 @@ public class EmailExportService {
     private final TextFilterService textFilterService;
     private final EmailBodyExtractorService emailBodyExtractorService;
     private final FileExportService fileExportService;
-    private final ZipExportService zipExportService;
 
     // Constructor
     public EmailExportService(
             GmailService gmailService,
             TextFilterService textFilterService,
             EmailBodyExtractorService emailBodyExtractorService,
-            FileExportService fileExportService,
-            ZipExportService zipExportService) {
+            FileExportService fileExportService ) {
 
         this.gmailService = gmailService;
         this.textFilterService = textFilterService;
         this.emailBodyExtractorService = emailBodyExtractorService;
         this.fileExportService = fileExportService;
-        this.zipExportService = zipExportService;
     }
 
     // Main workflow
@@ -122,13 +119,8 @@ public class EmailExportService {
         workflowReport.setFilesSaved(filesSaved);
         workflowReport.setFilesFailed(filesFailed);
 
-        boolean isZipFileCreated = zipExportService.createZipEmail(format);
-
         // Reporting
-        workflowReport.setZipCreated(isZipFileCreated);
-        workflowReport.setWorkflowCompleted(
-                isZipFileCreated && filesFailed == 0
-        );
+        workflowReport.setWorkflowCompleted(filesFailed == 0);
 
         // Reporting - end time and duration
         workflowReport.setEndTime(LocalDateTime.now());
@@ -153,7 +145,6 @@ public class EmailExportService {
                 + "Emails found: " + workflowReport.getEmailsFound() + "\n"
                 + "Files saved: " + workflowReport.getFilesSaved() + "\n"
                 + "Files failed: " + workflowReport.getFilesFailed() + "\n"
-                + "Zip file created: " + workflowReport.isZipCreated() + "\n"
                 + "Export completed at: " + workflowReport.getEndTime() + "\n"
                 + "Duration: " + workflowReport.getDuration() + " seconds\n";
 
