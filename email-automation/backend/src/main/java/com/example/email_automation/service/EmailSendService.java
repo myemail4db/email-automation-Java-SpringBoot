@@ -8,15 +8,17 @@ import org.springframework.stereotype.Service;
 public class EmailSendService {
 
     private final GmailService gmailService;
-
     private final ZipExportService zipExportService;
+    private final ArchiveService archiveService;
 
     public EmailSendService(
             ZipExportService zipExportService,
-            GmailService gmailService) {
+            GmailService gmailService,
+            ArchiveService archiveService) {
 
         this.zipExportService = zipExportService;
         this.gmailService = gmailService;
+        this.archiveService = archiveService;
     }
 
     public Path createZipForSend(String format) {
@@ -28,5 +30,22 @@ public class EmailSendService {
         }
 
         return zipFile;
+    }
+
+    public boolean sendEmail(String format) {
+
+        Path zipFile = createZipForSend(format);
+
+        if (zipFile == null) {
+            return false;
+        }
+
+        boolean isSent = gmailService.sendZipFile(zipFile);
+
+        if (!isSent) {
+            return false;
+        }
+
+        return archiveService.archiveFiles(format);
     }
 }

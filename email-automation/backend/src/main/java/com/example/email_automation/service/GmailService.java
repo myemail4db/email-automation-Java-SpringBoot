@@ -1,8 +1,13 @@
 package com.example.email_automation.service;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +20,12 @@ import com.google.api.services.gmail.model.Message;
 import com.google.api.services.gmail.model.ModifyMessageRequest;
 import com.google.api.services.gmail.model.Profile;
 
+import jakarta.mail.Session;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
+
 /**
  * This service gets the raw emails from Gmail
  */
@@ -25,7 +36,7 @@ public class GmailService {
 
     private final GmailAuthService authService;
 
-    @Value("${email.gmail.source-label}")
+    @Value("${email.gmail.recipient}")
     private String emailGmailSourceLabel;
 
     @Value("${email.gmail.success-label}")
@@ -33,6 +44,9 @@ public class GmailService {
 
     @Value("${email.gmail.fail-label}")
     private String emailGmailFailLabel;
+
+    @Value("${email.gmail.recipient}")
+    private String emailGmailRecipient;
 
     public GmailService(GmailAuthService authService) {
         this.authService = authService;
@@ -134,5 +148,74 @@ public class GmailService {
         throw new IllegalArgumentException(
                 "Gmail label not found: " + labelName
         );
+    }
+
+    public boolean sendZipFile(Path zipFile) {
+
+        if (zipFile == null || !Files.exists(zipFile)) {
+            logger.error("ZIP file does not exist: {}", zipFile);
+            return false;
+        }
+
+        try {
+
+            Properties properties = new Properties();
+            Session session = Session.getDefaultInstance(properties);
+
+            MimeMessage emailMessage = new MimeMessage(session);
+
+            emailMessage.setRecipient(
+                    jakarta.mail.Message.RecipientType.TO,
+                    new InternetAddress(emailGmailRecipient)
+            );
+
+            emailMessage.setSubject(
+                    "Job Batch - " + zipFile.getFileName().toString()
+            );
+
+            MimeMultipart multipart = new MimeMultipart();
+
+            MimeBodyPart textPart = new MimeBodyPart();
+
+            textPart.setText(
+                    "Please find the reviewed job batch attached.\n\nRegards"
+            );
+
+            multipart.addBodyPart(textPart);
+
+            MimeBodyPart attachmentPart = new MimeBodyPart();
+
+            attachmentPart.attachFile(zipFile.toFile());
+
+            multipart.addBodyPart(attachmentPart);
+
+            emailMessage.setContent(multipart);
+
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+            emailMessage.writeTo(buffer);
+
+            String encodedEmail = Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(buffer.toByteArray());
+
+            Message gmailMessage = new Message();
+            gmailMessage.setRaw(encodedEmail);
+
+            Gmail service = authService.getGmailClient();
+
+            service.users()
+                    .messages()
+                    .send("me", gmailMessage)
+                    .execute();
+
+            logger.info("ZIP file sent successfully through Gmail: {}", zipFile);
+
+            return true;
+
+        } catch (Exception e) {
+            logger.error("Failed to send ZIP file through Gmail.", e);
+            return false;
+        }
     }
 }
