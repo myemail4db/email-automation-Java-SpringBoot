@@ -154,22 +154,13 @@ public class ZipExportService {
         try {
 
             LocalDateTime receivedDate = LocalDateTime.now();
-
-            // // Input formatter (defines how to read the string)
-            // DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("EEE, d MMM yyyy HH:mm:ss a", Locale.ENGLISH);
-            
+           
             // Output formatter (defines how you want the string to look)
             DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
-            
-            // Parse and format
-            //ZonedDateTime zonedDateTime = ZonedDateTime.parse(receivedDate, inputFormatter);
-            //String result = zonedDateTime.format(outputFormatter);
-            
+                       
             // LocalDateTime localDateTime = LocalDateTime.parse(receivedDate, inputFormatter);
             // Outputs: 20230802_150405
             String result = receivedDate.format(outputFormatter);
-
-            logger.debug("Generated ZIP timestamp: {}", result); 
 
             return result;
 
