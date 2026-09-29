@@ -6,12 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.example.email_automation.model.SendWorkflowResult;
+import com.example.email_automation.model.WorkflowReport;
 
 @Service
 public class EmailSendService {
 
-    private static final Logger logger = LoggerFactory.getLogger(EmailSendService.class);
+    private static final Logger logger = 
+        LoggerFactory.getLogger(EmailSendService.class);
 
     private final GmailService gmailService;
     private final ZipExportService zipExportService;
@@ -38,9 +39,10 @@ public class EmailSendService {
         return zipFile;
     }
 
-    public SendWorkflowResult processSend(String format) {
+    public WorkflowReport processSend(String format) {
 
-        SendWorkflowResult result = new SendWorkflowResult();
+        WorkflowReport result = new WorkflowReport();
+        result.setFormat(format);
 
         Path zipFile = createZipForSend(format);
 

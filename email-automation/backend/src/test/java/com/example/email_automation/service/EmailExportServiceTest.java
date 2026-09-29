@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.example.email_automation.model.EmailMessage;
+import com.example.email_automation.model.WorkflowReport;
 import com.google.api.services.gmail.model.Message;
 
 @ExtendWith(MockitoExtension.class) // Use MockitoExtension to enable Mockito annotations
@@ -38,10 +39,13 @@ public class EmailExportServiceTest {
     @Test
     public void exportEmails_withNullFormat_returnsErrorMessage() {
         // Act
-        String result = emailExportService.exportEmails(null);
+        WorkflowReport result = emailExportService.exportEmails(null);
 
         // Assert
-        assertEquals("Format parameter is required. Use text or word.", result);
+        assertEquals(
+                "Format parameter is required. Use text or word.",
+                result.getStatusMessage()
+        );
     }
 
     @Test
@@ -55,10 +59,13 @@ public class EmailExportServiceTest {
         when(gmailService.getRecentEmails()).thenReturn(Collections.emptyList());
 
         // Act
-        String result = emailExportService.exportEmails(format);
+        WorkflowReport result = emailExportService.exportEmails(format);
 
         // Assert
-        assertEquals("No emails found to export.", result);
+        assertEquals(
+                "No emails found to export.",
+                result.getStatusMessage()
+        );
     }
     
     @Test
@@ -73,10 +80,14 @@ public class EmailExportServiceTest {
         when(gmailService.getRecentEmails()).thenReturn(Collections.singletonList(null));
 
         // Act
-        String result = emailExportService.exportEmails(format);
+        WorkflowReport result = emailExportService.exportEmails(format);
 
         // Assert
-        assertEquals("No emails found to export.", result);
+        assertEquals(
+                "Export completed with 1 file(s) failed.",
+                result.getStatusMessage()
+        );
+
     }
 
     @Test
@@ -109,11 +120,20 @@ public class EmailExportServiceTest {
         when(fileExportService.saveFile(any(EmailMessage.class), eq(format))).thenReturn(true);
 
         // Act
-        String result = emailExportService.exportEmails(format);
+        WorkflowReport result = emailExportService.exportEmails(format);
 
         // Assert
-        assertEquals(true, result.contains("Emails found: 1"));
-        assertEquals(true, result.contains("Files saved: 1"));
-        assertEquals(true, result.contains("Files failed: 0"));
+        assertEquals(
+                "Export completed successfully.",
+                result.getStatusMessage()
+        );
+        assertEquals(
+                "No emails found to export.",
+                result.getStatusMessage()
+        );
+        assertEquals(
+                "No emails found to export.",
+                result.getStatusMessage()
+        );
     }
 }

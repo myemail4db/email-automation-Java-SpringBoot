@@ -17,7 +17,8 @@ import com.google.api.services.gmail.model.Message;
 @Service
 public class EmailExportService {
 
-    private static final Logger logger = LoggerFactory.getLogger(EmailExportService.class);
+    private static final Logger logger = 
+        LoggerFactory.getLogger(EmailExportService.class);
 
     // Dependencies
     private final GmailService gmailService;
@@ -39,19 +40,39 @@ public class EmailExportService {
     }
 
     // Main workflow
-    public String exportEmails(String format) {
+    public WorkflowReport exportEmails(String format) {
 
         // Initialize a workflow report to track the export process
         WorkflowReport workflowReport = new WorkflowReport();
         workflowReport.setStartTime(LocalDateTime.now());
+        
+        logger.info("Export workflow started. Format={}", format);
 
         if (format == null) {
-            return "Format parameter is required. Use text or word.";
+            workflowReport.setStatusMessage("Format parameter is required. Use text or word.");
+            workflowReport.setEndTime(LocalDateTime.now());
+            workflowReport.setDuration(
+                    (int) java.time.Duration.between(
+                            workflowReport.getStartTime(),
+                            workflowReport.getEndTime()
+                    ).toSeconds()
+            );
+            return workflowReport;
         }
 
         if (!format.equalsIgnoreCase("text")
                 && !format.equalsIgnoreCase("word")) {
-            return "Invalid format. Use text or word.";
+
+            workflowReport.setStatusMessage("Invalid format. Use text or word.");
+            workflowReport.setEndTime(LocalDateTime.now());
+            workflowReport.setDuration(
+                    (int) java.time.Duration.between(
+                            workflowReport.getStartTime(),
+                            workflowReport.getEndTime()
+                    ).toSeconds()
+            );
+
+            return workflowReport;
         }
 
         // Reporting - set the format in the workflow report
@@ -60,11 +81,23 @@ public class EmailExportService {
         // Get recent emails from Gmail
         List<Message> emails;
 
+        logger.info("Retrieving emails from Gmail...");
+
         try {
             emails = gmailService.getRecentEmails();
         } catch (Exception e) {
             logger.error("Unable to retrieve emails from Gmail.", e);
-            return "Unable to retrieve emails from Gmail.";
+
+            workflowReport.setStatusMessage("Unable to retrieve emails from Gmail.");
+            workflowReport.setEndTime(LocalDateTime.now());
+            workflowReport.setDuration(
+                    (int) java.time.Duration.between(
+                            workflowReport.getStartTime(),
+                            workflowReport.getEndTime()
+                    ).toSeconds()
+            );
+
+            return workflowReport;
         }
 
         // Reporting - emails found
@@ -75,15 +108,32 @@ public class EmailExportService {
 
         // Handle case when there are no emails to export
         if (emails.isEmpty()) {
-            return "No emails found to export.";
+
+            workflowReport.setStatusMessage("No emails found to export.");
+            workflowReport.setEndTime(LocalDateTime.now());
+            workflowReport.setDuration(
+                    (int) java.time.Duration.between(
+                            workflowReport.getStartTime(),
+                            workflowReport.getEndTime()
+                    ).toSeconds()
+            );
+
+            return workflowReport;
         }
 
         // Initialize counters for saved and failed files
         int filesSaved = 0;
         int filesFailed = 0;
 
+        logger.info("Beginning processing of {} email(s).", emails.size());
+
+        int emailNumber = 0;
+
         // Process each email
         for (Message message : emails) {
+
+            emailNumber++;
+            logger.info("Processing email {} of {}.", emailNumber, emails.size());
 
             try {
 
@@ -93,12 +143,21 @@ public class EmailExportService {
 
                 if (isSaved) {
                     filesSaved++;
+                    logger.info("Email {} of {} saved successfully.", emailNumber, emails.size());
                 } else {
                     filesFailed++;
+                    logger.warn("Email {} of {} was not saved.", emailNumber, emails.size());
                 }
 
                 try {
                     gmailService.moveEmailToLabel(message, isSaved);
+
+                    logger.info(
+                            "Gmail label updated for email {} of {}.",
+                            emailNumber,
+                            emails.size()
+                    );
+
                 } catch (Exception e) {
                     logger.error("Error occurred while moving email to label.", e);
                 }
@@ -118,19 +177,34 @@ public class EmailExportService {
         // Reporting
         workflowReport.setFilesSaved(filesSaved);
         workflowReport.setFilesFailed(filesFailed);
-
-        // Reporting
         workflowReport.setWorkflowCompleted(filesFailed == 0);
 
         // Reporting - end time and duration
         workflowReport.setEndTime(LocalDateTime.now());
-        workflowReport.setDuration((int) java.time.Duration.between(workflowReport.getStartTime(), workflowReport.getEndTime()).toSeconds());
+        workflowReport.setDuration(
+            (int) java.time.Duration.between(
+                workflowReport.getStartTime(), 
+                workflowReport.getEndTime()
+            ).toSeconds());
+
+        logger.info(
+                "Export workflow finished. Emails found={}, Files saved={}, Files failed={}, Duration={} seconds.",
+                workflowReport.getEmailsFound(),
+                workflowReport.getFilesSaved(),
+                workflowReport.getFilesFailed(),
+                workflowReport.getDuration()
+        );
 
         // Reporting - create the summary report to the browser and console
-        String reportHeader = createReportHeader();
-        String reportBody = createReportBody(workflowReport);
-        reportBody = reportBody.replace("\n", "<br>");
-        return reportHeader + reportBody;
+        if (filesFailed == 0) {
+            workflowReport.setStatusMessage("Export completed successfully.");
+        } else {
+            workflowReport.setStatusMessage(
+                    "Export completed with " + filesFailed + " file(s) failed."
+            );
+        }
+
+        return workflowReport;
     }
 
     // Helper methods

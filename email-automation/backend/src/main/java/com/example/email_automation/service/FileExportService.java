@@ -19,7 +19,8 @@ import com.example.email_automation.model.EmailMessage;
 @Service
 public class FileExportService {
 
-    private static final Logger logger = LoggerFactory.getLogger(FileExportService.class);
+    private static final Logger logger = 
+        LoggerFactory.getLogger(FileExportService.class);
 
     @Value("${email.files.processed-dir}")
     private String emailFilesProcessedDir;

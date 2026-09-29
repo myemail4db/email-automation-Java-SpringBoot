@@ -32,11 +32,12 @@ import jakarta.mail.internet.MimeMultipart;
 @Service
 public class GmailService {
 
-    private static final Logger logger = LoggerFactory.getLogger(GmailService.class);
+    private static final Logger logger = 
+        LoggerFactory.getLogger(GmailService.class);
 
     private final GmailAuthService authService;
 
-    @Value("${email.gmail.recipient}")
+    @Value("${email.gmail.source-label}")
     private String emailGmailSourceLabel;
 
     @Value("${email.gmail.success-label}")

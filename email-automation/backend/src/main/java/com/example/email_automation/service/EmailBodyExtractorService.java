@@ -21,7 +21,8 @@ import com.google.api.services.gmail.model.MessagePartHeader;
 @Service
 public class EmailBodyExtractorService {
 
-    private static final Logger logger = LoggerFactory.getLogger(EmailSendService.class);
+    private static final Logger logger =
+        LoggerFactory.getLogger(EmailBodyExtractorService.class);
 
     public EmailMessage extractEmailMessage(Message message) {
         if (message == null) {

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ArchiveService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ZipExportService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ArchiveService.class);
 
     @Value("${email.files.processed-dir}")
     private String processedDirectory;
@@ -73,6 +73,7 @@ public class ArchiveService {
             return filesArchived;
 
         } catch (IOException e) {
+            logger.error("Failed to archive processed files.", e);
             return -1;
         }
     }

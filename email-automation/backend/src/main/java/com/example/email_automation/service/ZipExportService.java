@@ -19,7 +19,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class ZipExportService {
     
-    private static final Logger logger = LoggerFactory.getLogger(ZipExportService.class);
+    private static final Logger logger = 
+        LoggerFactory.getLogger(ZipExportService.class);
 
     @Value("${email.files.processed-dir}")
     private String emailFilesProcessedDir;

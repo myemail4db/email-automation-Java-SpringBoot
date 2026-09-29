@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.email_automation.model.SendWorkflowResult;
+import com.example.email_automation.model.WorkflowReport;
 import com.example.email_automation.service.EmailSendService;
 
 @RestController
@@ -19,7 +19,7 @@ public class SendController {
     @GetMapping("/api/send")
     public String sendEmails(@RequestParam(required = false, defaultValue = "text") String format) {
 
-        SendWorkflowResult result = emailSendService.processSend(format);
+        WorkflowReport result = emailSendService.processSend(format);
 
         if (!result.isZipCreated()) {
             return "ZIP file was not created.";

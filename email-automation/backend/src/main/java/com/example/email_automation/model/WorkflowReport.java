@@ -20,6 +20,8 @@ public class WorkflowReport {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String statusMessage;
+    private boolean isFilesArchived;
+    private int filesArchivedCount;
 
     public WorkflowReport() {
         this.format = "";
@@ -35,6 +37,8 @@ public class WorkflowReport {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         this.statusMessage = "";
+        this.isFilesArchived = false;
+        this.filesArchivedCount = 0;
     }
 
     public void setFormat(String format) {
@@ -127,5 +131,21 @@ public class WorkflowReport {
 
     public String getStatusMessage() {
         return statusMessage;
+    }
+
+    public void setFilesArchived(boolean isFilesArchived) {
+        this.isFilesArchived = isFilesArchived;
+    }
+
+    public boolean isFilesArchived() {
+        return isFilesArchived;
+    }
+
+    public void setFilesArchivedCount(int filesArchivedCount) {
+        this.filesArchivedCount = filesArchivedCount;
+    }
+
+    public int getFilesArchivedCount() {
+        return filesArchivedCount;
     }
 }
