@@ -19,6 +19,7 @@ public class WorkflowReport {
     private int duration;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String statusMessage;
 
     public WorkflowReport() {
         this.format = "";
@@ -33,6 +34,7 @@ public class WorkflowReport {
         this.duration = 0;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+        this.statusMessage = "";
     }
 
     public void setFormat(String format) {
@@ -119,4 +121,11 @@ public class WorkflowReport {
         return updatedAt;
     }
 
+    public void setStatusMessage(String statusMessage) {
+        this.statusMessage = statusMessage;
+    }
+
+    public String getStatusMessage() {
+        return statusMessage;
+    }
 }

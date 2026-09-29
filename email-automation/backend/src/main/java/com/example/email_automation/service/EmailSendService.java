@@ -2,10 +2,16 @@ package com.example.email_automation.service;
 
 import java.nio.file.Path;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import com.example.email_automation.model.SendWorkflowResult;
 
 @Service
 public class EmailSendService {
+
+    private static final Logger logger = LoggerFactory.getLogger(EmailSendService.class);
 
     private final GmailService gmailService;
     private final ZipExportService zipExportService;
@@ -32,20 +38,47 @@ public class EmailSendService {
         return zipFile;
     }
 
-    public boolean sendEmail(String format) {
+    public SendWorkflowResult processSend(String format) {
+
+        SendWorkflowResult result = new SendWorkflowResult();
 
         Path zipFile = createZipForSend(format);
 
         if (zipFile == null) {
-            return false;
+            logger.warn("Send workflow stopped: ZIP file was not created. Format={}", format);
+            return result;
         }
+
+        result.setZipCreated(true);
+        logger.info("ZIP file created successfully: {}", zipFile.getFileName());
 
         boolean isSent = gmailService.sendZipFile(zipFile);
 
         if (!isSent) {
-            return false;
+            logger.error("Send workflow stopped: Gmail send failed.");
+            return result;
         }
 
-        return archiveService.archiveFiles(format);
+        result.setEmailSent(true);
+        logger.info("Gmail send completed successfully.");
+
+        int filesArchived = archiveService.archiveFiles(format);
+
+        if (filesArchived < 0) {
+            logger.error("Email was sent successfully, but archiving failed.");
+            return result;
+        }
+
+        result.setFilesArchivedCount(filesArchived);
+
+        if (filesArchived == 0) {
+            logger.warn("Email was sent successfully, but no files were archived.");
+            return result;
+        }
+
+        result.setFilesArchived(true);
+        logger.info("Archive completed successfully. Files archived={}", filesArchived);
+
+        return result;
     }
 }

@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.email_automation.model.SendWorkflowResult;
 import com.example.email_automation.service.EmailSendService;
 
 @RestController
@@ -18,12 +19,20 @@ public class SendController {
     @GetMapping("/api/send")
     public String sendEmails(@RequestParam(required = false, defaultValue = "text") String format) {
 
-        boolean isSent = emailSendService.sendEmail(format);
+        SendWorkflowResult result = emailSendService.processSend(format);
 
-        if (!isSent) {
-            return "Email was not sent.";
+        if (!result.isZipCreated()) {
+            return "ZIP file was not created.";
         }
 
-        return "Email sent successfully.";
+        if (!result.isEmailSent()) {
+            return "ZIP file was created, but the email was not sent.";
+        }
+
+        if (!result.isFilesArchived()) {
+            return "Email was sent successfully, but the files were not archived.";
+        }
+
+        return "Email sent successfully and files archived.";
     }
 }

@@ -5,11 +5,15 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ArchiveService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ZipExportService.class);
 
     @Value("${email.files.processed-dir}")
     private String processedDirectory;
@@ -26,7 +30,7 @@ public class ArchiveService {
         }
     }
 
-    public boolean archiveFiles(String format) {
+    public int archiveFiles(String format) {
 
         String extension;
 
@@ -35,13 +39,15 @@ public class ArchiveService {
         } else if ("word".equalsIgnoreCase(format)) {
             extension = ".docx";
         } else {
-            return false;
+            return -1;
         }
 
         try {
             createArchiveDirectory();
 
             Path processedPath = Path.of(processedDirectory);
+
+            int filesArchived = 0;
 
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(processedPath)) {
 
@@ -59,13 +65,15 @@ public class ArchiveService {
                             .resolve(file.getFileName());
 
                     Files.move(file, destination);
+
+                    filesArchived++;
                 }
             }
 
-            return true;
+            return filesArchived;
 
         } catch (IOException e) {
-            return false;
+            return -1;
         }
     }
 }
