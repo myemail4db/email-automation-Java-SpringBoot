@@ -1,6 +1,7 @@
 package com.example.email_automation.service;
 
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,11 +44,16 @@ public class EmailSendService {
 
         WorkflowReport result = new WorkflowReport();
         result.setFormat(format);
+        result.setStartTime(LocalDateTime.now());
 
         Path zipFile = createZipForSend(format);
 
         if (zipFile == null) {
             logger.warn("Send workflow stopped: ZIP file was not created. Format={}", format);
+
+            result.setStatusMessage("ZIP file was not created.");
+            completeWorkflowReport(result);
+
             return result;
         }
 
@@ -58,6 +64,10 @@ public class EmailSendService {
 
         if (!isSent) {
             logger.error("Send workflow stopped: Gmail send failed.");
+
+            result.setStatusMessage("ZIP file was created, but the email was not sent.");
+            completeWorkflowReport(result);
+
             return result;
         }
 
@@ -68,6 +78,10 @@ public class EmailSendService {
 
         if (filesArchived < 0) {
             logger.error("Email was sent successfully, but archiving failed.");
+
+            result.setStatusMessage("Email was sent successfully, but archiving failed.");
+            completeWorkflowReport(result);
+
             return result;
         }
 
@@ -75,12 +89,32 @@ public class EmailSendService {
 
         if (filesArchived == 0) {
             logger.warn("Email was sent successfully, but no files were archived.");
+
+            result.setStatusMessage("Email was sent successfully, but no files were archived.");
+            completeWorkflowReport(result);
+
             return result;
         }
 
         result.setFilesArchived(true);
         logger.info("Archive completed successfully. Files archived={}", filesArchived);
 
+        result.setWorkflowCompleted(true);
+        result.setStatusMessage("Email sent successfully and files archived.");
+        completeWorkflowReport(result);
+
         return result;
+    }
+
+    private void completeWorkflowReport(WorkflowReport workflowReport) {
+
+        workflowReport.setEndTime(LocalDateTime.now());
+
+        workflowReport.setDuration(
+                (int) java.time.Duration.between(
+                        workflowReport.getStartTime(),
+                        workflowReport.getEndTime()
+                ).toSeconds()
+        );
     }
 }

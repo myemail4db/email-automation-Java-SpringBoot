@@ -50,13 +50,7 @@ public class EmailExportService {
 
         if (format == null) {
             workflowReport.setStatusMessage("Format parameter is required. Use text or word.");
-            workflowReport.setEndTime(LocalDateTime.now());
-            workflowReport.setDuration(
-                    (int) java.time.Duration.between(
-                            workflowReport.getStartTime(),
-                            workflowReport.getEndTime()
-                    ).toSeconds()
-            );
+            completeWorkflowReport(workflowReport);
             return workflowReport;
         }
 
@@ -64,13 +58,7 @@ public class EmailExportService {
                 && !format.equalsIgnoreCase("word")) {
 
             workflowReport.setStatusMessage("Invalid format. Use text or word.");
-            workflowReport.setEndTime(LocalDateTime.now());
-            workflowReport.setDuration(
-                    (int) java.time.Duration.between(
-                            workflowReport.getStartTime(),
-                            workflowReport.getEndTime()
-                    ).toSeconds()
-            );
+            completeWorkflowReport(workflowReport);
 
             return workflowReport;
         }
@@ -89,13 +77,7 @@ public class EmailExportService {
             logger.error("Unable to retrieve emails from Gmail.", e);
 
             workflowReport.setStatusMessage("Unable to retrieve emails from Gmail.");
-            workflowReport.setEndTime(LocalDateTime.now());
-            workflowReport.setDuration(
-                    (int) java.time.Duration.between(
-                            workflowReport.getStartTime(),
-                            workflowReport.getEndTime()
-                    ).toSeconds()
-            );
+            completeWorkflowReport(workflowReport);
 
             return workflowReport;
         }
@@ -104,20 +86,14 @@ public class EmailExportService {
         workflowReport.setEmailsFound(emails.size());
 
         logger.info("Found {} Gmail emails for {} export.", emails.size(), format);
-        System.out.println("Found " + emails.size() + " Gmail emails for " + format + " export.");
 
         // Handle case when there are no emails to export
         if (emails.isEmpty()) {
 
             workflowReport.setStatusMessage("No emails found to export.");
-            workflowReport.setEndTime(LocalDateTime.now());
-            workflowReport.setDuration(
-                    (int) java.time.Duration.between(
-                            workflowReport.getStartTime(),
-                            workflowReport.getEndTime()
-                    ).toSeconds()
-            );
+            completeWorkflowReport(workflowReport);
 
+            workflowReport.setWorkflowCompleted(true);
             return workflowReport;
         }
 
@@ -180,12 +156,7 @@ public class EmailExportService {
         workflowReport.setWorkflowCompleted(filesFailed == 0);
 
         // Reporting - end time and duration
-        workflowReport.setEndTime(LocalDateTime.now());
-        workflowReport.setDuration(
-            (int) java.time.Duration.between(
-                workflowReport.getStartTime(), 
-                workflowReport.getEndTime()
-            ).toSeconds());
+        completeWorkflowReport(workflowReport);
 
         logger.info(
                 "Export workflow finished. Emails found={}, Files saved={}, Files failed={}, Duration={} seconds.",
@@ -207,25 +178,16 @@ public class EmailExportService {
         return workflowReport;
     }
 
-    // Helper methods
-    private String createReportHeader() {
-        return "<h1>Export Summary</h1>";
-    }
+    private void completeWorkflowReport(WorkflowReport workflowReport) {
 
-    private String createReportBody(WorkflowReport workflowReport) {
-        // Return a summary report of the export operation
-        String reportHeader = "Export Summary:\n";
-        String exportReport = "Format: " + workflowReport.getFormat() + "\n"
-                + "Emails found: " + workflowReport.getEmailsFound() + "\n"
-                + "Files saved: " + workflowReport.getFilesSaved() + "\n"
-                + "Files failed: " + workflowReport.getFilesFailed() + "\n"
-                + "Export completed at: " + workflowReport.getEndTime() + "\n"
-                + "Duration: " + workflowReport.getDuration() + " seconds\n";
+        workflowReport.setEndTime(LocalDateTime.now());
 
-        // Print the export summary to the console
-        logger.info(reportHeader + exportReport);
-
-        return exportReport;
+        workflowReport.setDuration(
+                (int) java.time.Duration.between(
+                        workflowReport.getStartTime(),
+                        workflowReport.getEndTime()
+                ).toSeconds()
+        );
     }
 
     private EmailMessage cleanEmailBody(EmailMessage email) {
@@ -238,5 +200,4 @@ public class EmailExportService {
                 email.getReceivedDate()
         );
     }
-
 }

@@ -21,18 +21,6 @@ public class SendController {
 
         WorkflowReport result = emailSendService.processSend(format);
 
-        if (!result.isZipCreated()) {
-            return "ZIP file was not created.";
-        }
-
-        if (!result.isEmailSent()) {
-            return "ZIP file was created, but the email was not sent.";
-        }
-
-        if (!result.isFilesArchived()) {
-            return "Email was sent successfully, but the files were not archived.";
-        }
-
-        return "Email sent successfully and files archived.";
+        return result.getStatusMessage();
     }
 }
