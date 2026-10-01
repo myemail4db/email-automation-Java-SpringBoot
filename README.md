@@ -38,7 +38,7 @@ The project originated from a recruiter-email automation process that was first 
 
 The Java implementation was developed as a separate solution to achieve the same core processing outcomes using a different architecture and implementation approach. It uses Java 17, Spring Boot, REST APIs, separated services, DTOs, and OAuth2 Gmail integration.
 
-The Java project is maintained as an independent application with its own architecture, source code, testing, configuration, and documentation.
+The Java project is maintained as an independent application with its own architecture, source code, testing, configuration, and documentation. The core Java workflow is now implemented and runtime-validated, including export, manual review, duplicate prevention, ZIP creation, Gmail delivery, sent-file archiving, and workflow reporting.
 
 ---
 
@@ -77,16 +77,24 @@ docs/assets/source/
 
 ```mermaid
 flowchart TD
-    A["Gmail Authentication<br/>(Completed)"] --> B["Email Retrieval<br/>(Completed)"]
-    B --> C["Content Extraction<br/>(Completed)"]
-    C --> D["Text Filtering<br/>(Completed)"]
-    D --> E["TXT / DOCX Export<br/>(Completed)"]
-    E --> F["ZIP Processing<br/>(In Development)"]
-    F --> G["Outbound Email<br/>(In Development)"]
-    G --> H["Workflow Reporting<br/>(Planned)"]
+    A["Gmail Authentication"] --> B["Email Retrieval"]
+    B --> C["Content Extraction + Filtering"]
+    C --> D["TXT / DOCX Export"]
+    D --> E["processed_review/"]
+    E --> F["Manual Review<br/>User reviews and modifies files"]
+    F --> G["Duplicate Check<br/>Gmail Message ID"]
+    G -->|Already sent| H["duplicate/"]
+    G -->|New| I["ZIP Creation"]
+    I --> J["Gmail Delivery"]
+    J --> K["sent_archive_email/<br/>Individual sent files"]
+    J --> L["sent_archive_zip/<br/>Exact ZIP sent"]
+    K --> M["Workflow Report"]
+    L --> M
 ```
 
 The application processes emails from a user-designated Gmail label and does not automatically organize or move messages from the user's Inbox.
+
+The workflow intentionally pauses after export so the user can review and modify the generated TXT or DOCX files before continuing with the send operation. Exported filenames include the Gmail message ID (`_GMAIL-<messageId>`), which provides stable identity for duplicate detection across separate runs.
 
 ---
 
@@ -109,23 +117,28 @@ The application processes emails from a user-designated Gmail label and does not
 ### Completed
 
 * Spring Boot backend setup
-* Gmail OAuth2 authentication
-* Gmail API connectivity
-* Gmail label-based email retrieval
+* Gmail OAuth2 authentication and Gmail API connectivity
+* Gmail label-based email retrieval and label movement
 * Email subject and body extraction
 * DTO-based email processing
 * Recruiter email text filtering and normalization
-* TXT export
-* DOCX export
-* Duplicate filename handling
-* Configurable export directory
+* TXT and DOCX export
+* Manual review checkpoint before sending
+* Gmail message ID persisted in exported filenames
+* Gmail-ID duplicate detection across separate runs
+* Duplicate files moved to `duplicate/` with collision-safe `_2`, `_3`, and later suffixes
+* ZIP creation from reviewed, non-duplicate files
+* Outbound ZIP delivery through Gmail
+* Individual successfully sent files archived in `sent_archive_email/`
+* Exact successfully sent ZIP archived in `sent_archive_zip/`
+* Temporary ZIP cleanup when Gmail delivery fails
+* Workflow and partial-success reporting
+* JUnit 5 and Mockito safety tests
+* End-to-end runtime validation with Gmail
 
 ### In Development
 
-* ZIP export workflow
-* Outbound email delivery
-* Final workflow reporting
-* Expanded unit test coverage
+* Command-line interface using the existing service layer
 
 See the documentation website's **Current Status** page or [`docs/assets/source/06-current-status.md`](docs/assets/source/06-current-status.md) for additional implementation details.
 
@@ -185,10 +198,15 @@ Application configuration is managed through the Spring Boot resources directory
 backend/src/main/resources/
 ```
 
-For example, the export destination can be configured in `application.properties`:
+For example, the workflow directories can be configured in `application.properties`:
 
 ```properties
-email.export.export-successful=processed_review
+email.files.processed-dir=processed_review
+email.files.zip-dir=ready_to_send
+email.files.archive-dir=sent_archive_email
+email.files.zip-archive-dir=sent_archive_zip
+email.files.duplicate-dir=duplicate
+email.files.error-dir=error
 ```
 
 OAuth credentials and tokens contain sensitive information and should never be committed to the repository.
@@ -208,6 +226,19 @@ GET /api/health
 GET /api/gmail/status
 GET /api/gmail/emails
 GET /api/export
+GET /api/send
+```
+
+The optional `format` parameter on `/api/export` and `/api/send` defaults to `text`. Use `format=word` for DOCX processing.
+
+```text
+GET /api/export
+GET /api/export?format=text
+GET /api/export?format=word
+
+GET /api/send
+GET /api/send?format=text
+GET /api/send?format=word
 ```
 
 See the documentation website's **API** page or [`docs/assets/source/04-api-endpoints.md`](docs/assets/source/04-api-endpoints.md) for the current API reference.
@@ -216,17 +247,17 @@ See the documentation website's **API** page or [`docs/assets/source/04-api-endp
 
 ## Project Direction
 
-The immediate goal is to complete the Java Spring Boot application so that it independently provides the same core processing outcomes as the original Python email automation solution.
+The core Java Spring Boot email workflow is implemented and runtime-validated. Although the Java and Python applications address the same business problem, the Java implementation uses its own architecture and continues independently.
 
-Although both applications address the same business problem, the Java implementation uses its own architecture and development approach. Future development of the Java project will continue independently rather than requiring the Python implementation.
+The next development milestone is a command-line interface that reuses the existing service layer rather than duplicating business logic. Planned commands include export and send operations for text and Word formats.
 
-After the core Java workflow is completed, possible future enhancements include:
+Possible later enhancements include:
 
 * React-based text filtering, preview, and user review
 * Security hardening and secure credential storage
 * Encrypted ZIP exports
 * Secure backup and recovery
-* Improved workflow reporting and monitoring
+* Improved monitoring and diagnostics
 * Additional email provider support
 
 These are future possibilities and are not part of the current completed implementation.
