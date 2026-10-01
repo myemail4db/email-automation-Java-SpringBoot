@@ -26,15 +26,17 @@ public class EmailBodyExtractorService {
 
     public EmailMessage extractEmailMessage(Message message) {
         if (message == null) {
-            return new EmailMessage("", "", "", "");
+            return new EmailMessage("", "", "", "", "");
         }
 
+        String gmailId = message.getId();
         String subject = extractEmailSubject(message);
         String from = extractEmailFrom(message);
         String body = extractEmailBody(message);
         String receivedDate = extractEmailReceivedDate(message);
 
         return new EmailMessage(
+                gmailId,
                 subject,
                 from,
                 body,

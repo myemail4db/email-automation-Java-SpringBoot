@@ -104,6 +104,7 @@ public class EmailExportServiceTest {
         message.setSnippet("This is the full email body.");
 
         EmailMessage emailMessage = new EmailMessage(
+            "test-id",
             "Test Subject",
             "sender@gmail.com",
             "This is the full email body.",
@@ -125,14 +126,6 @@ public class EmailExportServiceTest {
         // Assert
         assertEquals(
                 "Export completed successfully.",
-                result.getStatusMessage()
-        );
-        assertEquals(
-                "No emails found to export.",
-                result.getStatusMessage()
-        );
-        assertEquals(
-                "No emails found to export.",
                 result.getStatusMessage()
         );
     }

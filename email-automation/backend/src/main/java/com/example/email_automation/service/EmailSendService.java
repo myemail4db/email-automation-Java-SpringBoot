@@ -46,9 +46,39 @@ public class EmailSendService {
         result.setFormat(format);
         result.setStartTime(LocalDateTime.now());
 
+        int duplicatesArchived = archiveService.archiveDuplicateFiles(format);
+
+        if (duplicatesArchived < 0) {
+            logger.error("Send workflow stopped: duplicate file check failed.");
+
+            result.setStatusMessage("Duplicate file check failed. No email was sent.");
+            completeWorkflowReport(result);
+
+            return result;
+        }
+
+        result.setDuplicateFilesArchived(duplicatesArchived);
+
         Path zipFile = createZipForSend(format);
 
         if (zipFile == null) {
+
+            if (duplicatesArchived > 0) {
+                logger.info(
+                        "Send workflow completed with no new files to send. Duplicates archived={}",
+                        duplicatesArchived
+                );
+
+                result.setWorkflowCompleted(true);
+                result.setStatusMessage(
+                        "No new files to send. Duplicate files archived: " + duplicatesArchived
+                );
+
+                completeWorkflowReport(result);
+
+                return result;
+            }
+
             logger.warn("Send workflow stopped: ZIP file was not created. Format={}", format);
 
             result.setStatusMessage("ZIP file was not created.");
@@ -63,13 +93,22 @@ public class EmailSendService {
         boolean isSent = gmailService.sendZipFile(zipFile);
 
         if (!isSent) {
-            logger.error("Send workflow stopped: Gmail send failed.");
+        logger.error("Send workflow stopped: Gmail send failed.");
 
-            result.setStatusMessage("ZIP file was created, but the email was not sent.");
-            completeWorkflowReport(result);
-
-            return result;
+        try {
+            zipExportService.deleteZipFile(zipFile);
+        } catch (java.io.IOException e) {
+            logger.error(
+                    "Gmail send failed and temporary ZIP cleanup also failed.",
+                    e
+            );
         }
+
+        result.setStatusMessage("ZIP file was created, but the email was not sent.");
+        completeWorkflowReport(result);
+
+        return result;
+    }
 
         result.setEmailSent(true);
         logger.info("Gmail send completed successfully.");
@@ -99,8 +138,33 @@ public class EmailSendService {
         result.setFilesArchived(true);
         logger.info("Archive completed successfully. Files archived={}", filesArchived);
 
+        try {
+            zipExportService.archiveZipFile(zipFile);
+        } catch (java.io.IOException e) {
+            logger.error("Email was sent successfully, but ZIP archiving failed.", e);
+
+            result.setStatusMessage(
+                    "Email was sent successfully, but ZIP archiving failed."
+            );
+
+            completeWorkflowReport(result);
+
+            return result;
+        }
+
         result.setWorkflowCompleted(true);
-        result.setStatusMessage("Email sent successfully and files archived.");
+        
+        if (duplicatesArchived > 0) {
+            result.setStatusMessage(
+                    "Email sent successfully and files archived. Duplicate files skipped: "
+                            + duplicatesArchived
+            );
+        } else {
+            result.setStatusMessage(
+                    "Email sent successfully and files archived."
+            );
+        }
+
         completeWorkflowReport(result);
 
         return result;

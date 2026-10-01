@@ -53,7 +53,8 @@ public class FileExportService {
 
         try {
             // Create a safe filename based on the email subject
-            String filenameString = createSafeFilename(content.getSubject());
+            String filenameString = createSafeFilename(content.getSubject())
+                    + "_GMAIL-" + content.getGmailId();
             
             // Create the file path with the appropriate extension
             // Possibly throws IOException
@@ -95,7 +96,8 @@ public class FileExportService {
         // Create and format the DOCX file
 
         // Create a safe filename based on the email subject
-        String filenameString = createSafeFilename(content.getSubject());
+        String filenameString = createSafeFilename(content.getSubject())
+                + "_GMAIL-" + content.getGmailId();
 
         try {            
             // Create the file path with the appropriate extension

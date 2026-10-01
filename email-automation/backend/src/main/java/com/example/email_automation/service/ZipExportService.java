@@ -31,6 +31,9 @@ public class ZipExportService {
     @Value("${email.files.zip-prefix}")
     private String zipFilesZipPrefix;
 
+    @Value("${email.files.zip-archive-dir}")
+    private String zipArchiveDirectory;
+
     public Path createZipEmail(String format) {
 
         String extension;
@@ -144,7 +147,7 @@ public class ZipExportService {
         }
     }
 
-    //String date = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+    // String date = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 
     // Format the email received date for filename
     // Example input: "Wed, 2 Aug 2023 15:04:05"
@@ -170,5 +173,33 @@ public class ZipExportService {
             return "unknown_date";
         }
 
+    }
+ 
+    public void archiveZipFile(Path zipFile) throws IOException {
+
+        Path zipArchivePath = Path.of(zipArchiveDirectory);
+
+        Files.createDirectories(zipArchivePath);
+
+        Path destination = zipArchivePath.resolve(
+                zipFile.getFileName()
+        );
+
+        Files.move(zipFile, destination);
+
+        logger.info(
+                "ZIP file archived successfully. File={}",
+                destination.getFileName()
+        );
+    }
+
+    public void deleteZipFile(Path zipFile) throws IOException {
+
+        Files.deleteIfExists(zipFile);
+
+        logger.info(
+                "ZIP file deleted after unsuccessful send. File={}",
+                zipFile.getFileName()
+        );
     }
 }

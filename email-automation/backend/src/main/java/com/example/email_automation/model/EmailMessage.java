@@ -6,23 +6,39 @@ package com.example.email_automation.model;
  
 public class EmailMessage {
 
+    private String gmailId;
     private String subject;
     private String from;
     private String body;
     private String receivedDate;
 
     public EmailMessage() {
+        this.gmailId = "";
         this.subject = "";
         this.from = "";
         this.body = "";
         this.receivedDate = "";
     }
     
-    public EmailMessage(String subject, String from, String body, String receivedDate) {
+    public EmailMessage(
+            String gmailId,
+            String subject, 
+            String from, 
+            String body, 
+            String receivedDate) {
+                
+        this.gmailId = gmailId;
         this.subject = subject;
         this.from = from;
         this.body = body;
         this.receivedDate = receivedDate;
+    }
+
+    public void setGmailId(String gmailId) {
+        this.gmailId = gmailId;
+    }
+    public String getGmailId() {
+        return gmailId;
     }
 
     public void setSubject(String subject) {

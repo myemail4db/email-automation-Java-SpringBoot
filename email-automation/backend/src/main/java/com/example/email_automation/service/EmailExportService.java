@@ -194,6 +194,7 @@ public class EmailExportService {
         String cleanedBody = textFilterService.clean(email.getBody());
 
         return new EmailMessage(
+                email.getGmailId(),
                 email.getSubject(),
                 email.getFrom(),
                 cleanedBody,

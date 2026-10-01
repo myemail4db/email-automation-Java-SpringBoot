@@ -76,13 +76,12 @@ logs/
 *.log
 
 # Generated runtime directories
-input/
-processed_review/
-jobs_to_review/
-sent_archive/
+duplicate/
 error/
+processed_review/
 ready_to_send/
-send_archive/
+sent_archive_zip/
+sent_archive_email/
 
 
 

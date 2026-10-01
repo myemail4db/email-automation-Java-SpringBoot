@@ -22,6 +22,7 @@ public class WorkflowReport {
     private String statusMessage;
     private boolean isFilesArchived;
     private int filesArchivedCount;
+    private int duplicateFilesArchived;
 
     public WorkflowReport() {
         this.format = "";
@@ -39,6 +40,7 @@ public class WorkflowReport {
         this.statusMessage = "";
         this.isFilesArchived = false;
         this.filesArchivedCount = 0;
+        this.duplicateFilesArchived = 0;
     }
 
     public void setFormat(String format) {
@@ -147,5 +149,13 @@ public class WorkflowReport {
 
     public int getFilesArchivedCount() {
         return filesArchivedCount;
+    }
+
+    public void setDuplicateFilesArchived(int duplicateFilesArchived) {
+        this.duplicateFilesArchived = duplicateFilesArchived;
+    }
+
+    public int getDuplicateFilesArchived() {
+        return duplicateFilesArchived;
     }
 }
