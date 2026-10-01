@@ -65,13 +65,13 @@ public class EmailSendService {
 
             if (duplicatesArchived > 0) {
                 logger.info(
-                        "Send workflow completed with no new files to send. Duplicates archived={}",
+                        "Send workflow completed with no new files to send. Duplicate files moved={}",
                         duplicatesArchived
                 );
 
                 result.setWorkflowCompleted(true);
                 result.setStatusMessage(
-                        "No new files to send. Duplicate files archived: " + duplicatesArchived
+                        "No new files to send. Duplicate files moved: " + duplicatesArchived
                 );
 
                 completeWorkflowReport(result);
