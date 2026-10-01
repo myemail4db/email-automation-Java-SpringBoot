@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="460" viewBox="0 0 1100 460">
+<rect width="1100" height="460" rx="18" fill="#eef2f7"/><rect x="28" y="28" width="1044" height="404" rx="12" fill="#fff" stroke="#d7dee8"/>
+<rect x="28" y="28" width="1044" height="48" rx="12" fill="#f8fafc"/><text x="55" y="59" font-family="Arial,sans-serif" font-size="16" fill="#344054">Manual Review — Web Python Developer…txt</text>
+<text x="62" y="120" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="#667085">JOB EMAIL CONTENT</text>
+<text x="62" y="160" font-family="monospace" font-size="16" fill="#172033">Subject: Web Python Developer</text><text x="62" y="194" font-family="monospace" font-size="16" fill="#172033">Location: San Francisco, CA</text>
+<text x="62" y="244" font-family="monospace" font-size="16" fill="#172033">[Review the generated content here.]</text><text x="62" y="278" font-family="monospace" font-size="16" fill="#172033">[Edit or remove text if needed, then save the file.]</text>
+<rect x="55" y="326" width="990" height="68" rx="8" fill="#fff8e7"/><text x="76" y="354" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="#8a5a00">Human checkpoint</text><text x="76" y="379" font-family="Arial,sans-serif" font-size="15" fill="#475467">The Send workflow starts only after the user finishes reviewing and modifying the files.</text>
+</svg>

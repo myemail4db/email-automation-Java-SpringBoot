@@ -39,3 +39,13 @@ table{width:100%;border-collapse:collapse;margin:14px 0 22px;font-size:14px}th,t
 .callout{border-left:4px solid var(--accent);background:#f6f9ff;padding:14px 18px;border-radius:0 8px 8px 0;margin:18px 0}
 .footer{max-width:var(--max);margin:0 auto;padding:0 24px 36px;color:var(--muted);font-size:13px}
 @media(max-width:800px){.layout{grid-template-columns:1fr}.sidebar{position:static}.toplinks{display:none}.hero{padding:32px 26px}.hero h1{font-size:34px}.grid{grid-template-columns:1fr}}
+
+/* Workflow examples */
+.workflow-stage{display:grid;grid-template-columns:78px 1fr;gap:18px;align-items:start;border:1px solid var(--line);background:#fbfcfe;border-radius:10px;padding:18px;margin:20px 0 14px}
+.workflow-stage.human{background:#fffaf0;border-color:#ead7a3}
+.stage-number{display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:9px;background:#173b73;color:#fff;font-weight:800;font-size:16px;padding:8px;text-align:center}
+.workflow-stage.human .stage-number{background:#8a5a00}
+.workflow-stage h3{margin:2px 0 6px}.workflow-stage p{margin:0}
+.screenshot{margin:14px 0 34px}.screenshot img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:12px;background:#eef2f7;box-shadow:0 8px 24px rgba(16,24,39,.07)}
+.screenshot figcaption{font-size:13px;color:var(--muted);margin-top:8px}
+@media(max-width:650px){.workflow-stage{grid-template-columns:1fr}.stage-number{width:max-content;min-width:52px}}

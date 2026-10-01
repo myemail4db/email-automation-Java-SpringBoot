@@ -1,45 +1,54 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>Project Background | Email Automation</title>
-<meta name="description" content="Java Spring Boot Email Automation portfolio case study">
-<link rel="stylesheet" href="../assets/css/site.css"></head>
+<meta content="Java Spring Boot Email Automation portfolio case study" name="description"/>
+<link href="../assets/css/site.css" rel="stylesheet"/></head>
 <body>
 <header class="topbar"><div class="topbar-inner"><a class="brand" href="../index.html">Email Automation</a>
 <nav class="toplinks"><a href="../pages/architecture.html">Architecture</a><a href="../pages/status.html">Status</a><a href="../pages/setup.html">Run locally</a></nav></div></header>
 <div class="layout">
 <aside class="sidebar">
-  <div class="label">Case Study</div>
-  <a href="../index.html">Overview</a>
-  <a href="project-background.html" class="active">Project Background</a>
-  <a href="architecture.html">Architecture</a>
-  <a href="workflow.html">Workflow</a>
-  <a href="engineering.html">Engineering Decisions</a>
-  <a href="api.html">API</a>
-  <a href="setup.html">Setup & Run</a>
-  <a href="gmail-oauth.html">Gmail & OAuth Setup</a>
-  <a href="customize.html">Customize the Application</a>
-  <a href="status.html">Current Status</a>
-  <a href="roadmap.html">Roadmap</a>
-</aside><main><div class="crumbs"><a href="../index.html">Email Automation</a> &nbsp;/&nbsp; Project Background</div>
-<div class="kicker">The problem behind the code</div><h1>Project Background</h1>
-<section class="content"><h2>Why this project exists</h2><p>The project began with a repetitive email-review workflow. Recruiter and job-opportunity emails had to be opened, reviewed, cleaned up, organized, and prepared for later review. The manual process took roughly 12 hours.</p>
-<p>A Python implementation was created first to prove that the workflow could be automated. That version reduced the manual review effort to approximately 90 minutes.</p>
-<div class="callout"><strong>Key result:</strong> the Python version validated the workflow. The Java project is not a speculative rewrite. It rebuilds a workflow that had already demonstrated practical value.</div>
-<h2>Why rebuild it in Java?</h2><p>The Java 17 / Spring Boot implementation explores a more structured backend architecture. Instead of placing the complete process in one script, responsibilities are separated into services for authentication, retrieval, extraction, filtering, file generation, ZIP creation, outbound email, and orchestration.</p>
-<h2>User control</h2><p>The application processes emails that the user has already placed in a designated Gmail label. It intentionally does not automatically move or reorganize Inbox messages.</p>
-<h2>Version 1 goal</h2><p>Version 1 aims to reproduce the proven core workflow in Java, then establish a foundation for future enhancements without requiring a major architectural redesign.</p></section>
-<section class="card"><h2>Project evolution</h2><pre><code>Manual Email Workflow
+<div class="label">Case Study</div>
+<a href="../index.html">Overview</a>
+<a class="active" href="project-background.html">Project Background</a>
+<a href="architecture.html">Architecture</a>
+<a href="workflow.html">Workflow</a>
+<a href="engineering.html">Engineering Decisions</a>
+<a href="api.html">API</a>
+<a href="setup.html">Setup &amp; Run</a>
+<a href="gmail-oauth.html">Gmail &amp; OAuth Setup</a>
+<a href="customize.html">Customize the Application</a>
+<a href="status.html">Current Status</a>
+<a href="roadmap.html">Roadmap</a>
+</aside><main><div class="crumbs"><a href="../index.html">Email Automation</a>  /  Project Background</div><div class="kicker">Why the project exists</div><h1>Project Background</h1><section class="content"><h2>From manual processing to a repeatable workflow</h2><p>The project began with a repetitive recruiter-email review process that required roughly 12 hours of manual work. A Python implementation first proved the automation concept and reduced the effort to about 90 minutes.</p><p>The Java 17 / Spring Boot version rebuilds the proven workflow with clearer service boundaries, REST entry points, workflow reporting, safer duplicate handling, and explicit artifact lifecycle management.</p>
+<h2>Current end-to-end workflow</h2><pre><code>Gmail source label
+      ↓
+EXPORT → TXT / DOCX in processed_review/
+      ↓
+USER MANUAL REVIEW AND MODIFICATION
+      ↓
+SEND
+      ↓
+Gmail-ID duplicate check
+  ├── already sent → duplicate/
+  └── new → ZIP → Gmail delivery
+                    ↓
+          sent_archive_email/
+          sent_archive_zip/</code></pre>
+<div class="callout"><strong>Current milestone:</strong> the core Java workflow is implemented and runtime-validated. The next feature is a command-line interface that reuses the same service layer.</div>
+<h2>Project evolution</h2><pre><code>Manual Email Workflow
         ↓
 Python Automation
         ↓
-Workflow Validated
-~12 hours → ~90 minutes
+Workflow Validated (~12 hours → ~90 minutes)
         ↓
 Java Spring Boot Redesign
         ↓
-Version 1 Feature Parity
+Core Java Workflow Completed + Runtime Validated
         ↓
-Future Enhancements</code></pre></section>
-</main></div>
+CLI Interface
+        ↓
+Future Security / UI / Monitoring Enhancements</code></pre></section><div class="next"><a href="architecture.html">Next: Architecture →</a></div></main></div>
 <footer class="footer">Java 17 · Spring Boot · Gmail API · OAuth 2.0 · Apache POI · Maven</footer>
 <script src="../assets/js/site.js"></script></body></html>

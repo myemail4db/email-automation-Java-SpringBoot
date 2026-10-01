@@ -1,61 +1,10 @@
 # Setup and Run Guide
 
-## Prerequisites
-
-- Java 17
-- Maven
-- Git
-- Google account
-- Google Cloud project with Gmail API enabled
-- OAuth credentials for Gmail API access
-
-## Clone the Repository
-
-```bash
-git clone <repository-url>
-cd email-automation/backend
-```
-
-## Build
-
-```bash
-mvn clean compile
-```
-
-## Run
-
-```bash
-mvn spring-boot:run
-```
-
-The backend runs locally at:
-
-```text
-http://localhost:8080
-```
-
-## Verify
-
-```bash
-curl http://localhost:8080/api/health
-```
-
-## Configuration
-
-Spring Boot application configuration is stored under:
-
-```text
-backend/src/main/resources/
-```
-
-Example:
-
-```properties
-email.export.output-dir=processed_review
-```
-
-## Gmail OAuth
-
-A Google Cloud project with the Gmail API enabled and appropriate OAuth credentials is required.
-
-OAuth client credentials, access tokens, refresh tokens, and other sensitive configuration must not be committed to the repository.
+1. Configure Gmail OAuth and application properties.
+2. Run `mvn clean test`.
+3. Start with `mvn spring-boot:run`.
+4. Verify `http://localhost:8080/api/health` and `http://localhost:8080/api/gmail/status`.
+5. Export with `/api/export`, `/api/export?format=text`, or `/api/export?format=word`. The optional format defaults to `text`.
+6. Manually review/modify the files in `processed_review/`.
+7. Send with `/api/send`, `/api/send?format=text`, or `/api/send?format=word`. The optional format defaults to `text`.
+8. Verify individual files in `sent_archive_email/` and the exact ZIP in `sent_archive_zip/`. Duplicates should move to `duplicate/` and should not be resent.

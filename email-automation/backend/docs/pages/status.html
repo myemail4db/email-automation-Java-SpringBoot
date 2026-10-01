@@ -22,10 +22,41 @@
   <a href="roadmap.html">Roadmap</a>
 </aside><main><div class="crumbs"><a href="../index.html">Email Automation</a> &nbsp;/&nbsp; Current Status</div>
 <div class="kicker">Version 1 snapshot</div><h1>Current Status</h1>
-<section class="content"><h2><span class="status done">Completed</span> Core workflow capabilities</h2>
-<ul><li>Spring Boot backend setup</li><li>Gmail OAuth 2.0 authentication</li><li>Gmail API connectivity</li><li>Label-based email retrieval</li><li>Email subject and body extraction</li><li>DTO-based processing</li><li>Recruiter-email text filtering and normalization</li><li>TXT export</li><li>DOCX export using Apache POI</li><li>Duplicate filename handling</li><li>Configurable export directory</li><li>Initial JUnit 5 / Mockito tests</li></ul>
-<h2><span class="status dev">In development</span> Version 1 completion</h2><ul><li>ZIP export workflow and verification</li><li>Outbound email delivery</li><li>Final end-to-end workflow reporting</li></ul>
-<h2><span class="status plan">Planned</span> After the core workflow</h2><p>Additional testing, security hardening, protected archives, improved monitoring, a possible React review experience, and other provider integrations are intentionally deferred until the Version 1 workflow is complete.</p></section>
+<section class="content">
+<h2><span class="status done">Completed</span> Core workflow</h2>
+<ul>
+<li>Spring Boot backend, Gmail OAuth 2.0, and Gmail API connectivity</li>
+<li>Label-based Gmail retrieval and label movement</li>
+<li>Email extraction, DTO processing, filtering, and normalization</li>
+<li>TXT and DOCX export for manual review</li>
+<li>Manual review checkpoint before sending</li>
+<li>ZIP creation and outbound Gmail delivery</li>
+<li>Workflow reporting for export, send, archive, duplicate, and partial-success outcomes</li>
+</ul>
+
+<h2><span class="status done">Completed</span> Send safety and duplicate prevention</h2>
+<ul>
+<li>Gmail message ID persisted in filenames as <code>_GMAIL-&lt;messageId&gt;</code></li>
+<li>Previously sent messages detected by Gmail message ID before ZIP creation</li>
+<li>Duplicate files moved to <code>duplicate/</code> and excluded from delivery</li>
+<li>Duplicate filename collisions preserved with <code>_2</code>, <code>_3</code>, and later suffixes</li>
+<li>Successfully sent individual files archived in <code>sent_archive_email/</code></li>
+<li>The exact successfully sent ZIP archived in <code>sent_archive_zip/</code></li>
+<li>Temporary ZIP removed when Gmail delivery fails</li>
+<li>JUnit 5 / Mockito coverage for duplicate and ZIP lifecycle safety paths</li>
+<li>Real Gmail runtime validation completed for successful send, duplicate rejection, and repeated duplicate collisions</li>
+</ul>
+
+<h2>Current Version 1 flow</h2>
+<div class="callout"><strong>Export → Manual Review → Send → Sent Archives</strong><br><br>
+Exported files wait in <code>processed_review/</code>. The user reviews and may modify them before continuing. During Send, previously sent Gmail IDs are moved to <code>duplicate/</code>. New files are ZIPped and sent. After confirmed delivery, the individual files move to <code>sent_archive_email/</code> and the exact ZIP moves to <code>sent_archive_zip/</code>.</div>
+
+<h2><span class="status dev">Next</span> Command-line interface</h2>
+<p>The next development step is a command-line interface that calls the same <code>EmailExportService</code> and <code>EmailSendService</code> used by the web/API layer. This adds command-line operation without duplicating the business logic.</p>
+
+<h2><span class="status plan">Planned later</span></h2>
+<p>Security hardening, protected credential storage, encrypted ZIP delivery, expanded monitoring, a possible React review experience, and additional email provider integrations remain future enhancements.</p>
+</section>
 </main></div>
 <footer class="footer">Java 17 · Spring Boot · Gmail API · OAuth 2.0 · Apache POI · Maven</footer>
 <script src="../assets/js/site.js"></script></body></html>

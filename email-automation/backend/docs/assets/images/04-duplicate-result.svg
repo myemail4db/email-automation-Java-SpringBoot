@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="450" viewBox="0 0 1100 450">
+<rect width="1100" height="450" rx="18" fill="#eef2f7"/><rect x="28" y="28" width="1044" height="394" rx="12" fill="#fff" stroke="#d7dee8"/>
+<rect x="28" y="28" width="1044" height="48" rx="12" fill="#f8fafc"/><text x="55" y="59" font-family="Arial,sans-serif" font-size="16" fill="#344054">Duplicate Run — expected result</text>
+<text x="62" y="118" font-family="monospace" font-size="17" font-weight="bold" fill="#172033">duplicate/</text><text x="86" y="154" font-family="monospace" font-size="16" fill="#344054">Web Python Developer_GMAIL-19d46c2669b19b6f.txt</text><text x="86" y="184" font-family="monospace" font-size="16" fill="#344054">Technical Engineer_GMAIL-19d46b78db99b309.txt</text>
+<text x="62" y="238" font-family="Arial,sans-serif" font-size="15" fill="#475467">If the same duplicate filenames already exist, the application preserves both copies:</text><text x="86" y="276" font-family="monospace" font-size="16" fill="#344054">Web Python Developer_GMAIL-19d46c2669b19b6f_2.txt</text>
+<rect x="55" y="322" width="990" height="68" rx="8" fill="#f6f9ff"/><text x="76" y="350" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="#174ea6">No new files to send. Duplicate files moved: 2</text><text x="76" y="376" font-family="Arial,sans-serif" font-size="15" fill="#475467">No ZIP is created and no new email is sent.</text>
+</svg>

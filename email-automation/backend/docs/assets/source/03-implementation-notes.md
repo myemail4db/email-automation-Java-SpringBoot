@@ -1,75 +1,18 @@
 # Implementation Notes
 
-## Service Responsibilities
+## Manual review checkpoint
+Export and Send are intentionally separate. Export writes TXT/DOCX files to `processed_review/` and stops. The user reviews and may modify the files before explicitly starting Send.
 
-The Java implementation separates external API access, processing logic, file generation, ZIP processing, and outbound delivery into dedicated services.
+## Gmail-ID duplicate identity
+Generated-file hashes were not reliable business identity because repeated exports of the same Gmail message can produce different bytes. The Java workflow therefore persists the Gmail message ID in filenames as `_GMAIL-<messageId>` and checks that ID against `sent_archive_email/`.
 
-Controllers remain focused on HTTP interaction while the service layer performs the workflow.
+Already-sent messages move to `duplicate/` before ZIP creation. Duplicate-directory filename collisions are preserved with `_2`, `_3`, and later suffixes.
 
-## Defensive Processing
+## ZIP lifecycle
+New reviewed files are packaged in `ready_to_send/`. If Gmail send fails, the temporary ZIP is deleted and source files remain available. After confirmed delivery, individual files move to `sent_archive_email/` and the exact ZIP moves to `sent_archive_zip/`.
 
-The workflow includes defensive checks for conditions such as:
+## Workflow reporting
+`WorkflowReport` records export/send outcomes, counts, ZIP creation, email delivery, archive results, completion state, timing, and status messages. Partial-success states are reported explicitly.
 
-- missing export formats
-- null service results
-- empty email collections
-- invalid or missing email content
-- failed file saves
-
-The goal is to return a meaningful workflow result rather than allowing common processing problems to cause an uncontrolled application failure.
-
-## Workflow Results
-
-The export workflow tracks processing results such as:
-
-- emails found
-- files successfully created
-- failed file exports
-
-Workflow reporting is being expanded so that ZIP creation and outbound email delivery can also contribute their results.
-
-## ZIP Processing
-
-ZIP processing is currently under development.
-
-Current ZIP processing includes:
-
-- creating the destination directory when necessary
-- generating the ZIP file
-- selecting the correct exported files
-- adding files to the archive
-- preventing resource leaks
-- returning the ZIP result to the remaining workflow
-
-ZIP processing should not be considered complete until the full workflow has been verified.
-
-## Outbound Email
-
-Outbound email delivery is also under development.
-
-The intent is to reuse the existing authenticated Gmail integration to send the completed export archive to the configured destination address.
-
-Email sending is kept in a dedicated service rather than adding outbound-email responsibilities to Gmail retrieval logic.
-
-## Testing Approach
-
-JUnit 5 and Mockito have been introduced for automated testing.
-
-Current tests demonstrate:
-
-- Spring Boot context loading
-- dependency mocking
-- defensive workflow behavior
-- successful export workflow behavior
-
-Additional testing is planned around important workflow boundaries.
-
-## Error Handling and Logging
-
-Services should log useful processing and failure information while avoiding unnecessary exposure of sensitive Gmail or OAuth data.
-
-## Security Considerations
-
-OAuth credentials, access tokens, refresh tokens, and other sensitive configuration should not be committed to source control.
-
-Additional security hardening is planned, including stronger credential protection, integrity checks, protected export archives, and secure backup and recovery options.
+## Testing
+JUnit 5 and Mockito tests cover Gmail-ID duplicate detection, duplicate filename collisions, ZIP archival, failed-send cleanup, and partial-success behavior. The lifecycle was also verified with real Gmail runs.

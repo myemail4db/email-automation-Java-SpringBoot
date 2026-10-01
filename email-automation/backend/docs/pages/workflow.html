@@ -22,23 +22,61 @@
   <a href="roadmap.html">Roadmap</a>
 </aside><main><div class="crumbs"><a href="../index.html">Email Automation</a> &nbsp;/&nbsp; Workflow</div>
 <div class="kicker">End-to-end behavior</div><h1>Workflow</h1>
-<section class="content"><h2>Primary processing sequence</h2>
-<ol><li>A REST export request starts the workflow.</li><li>The application authenticates with Gmail and retrieves messages from the configured label.</li><li>Message content is extracted into the application's internal representation.</li><li>Text is filtered and normalized.</li><li>The selected export format produces TXT or DOCX files.</li><li>Generated files are packaged into a ZIP archive.</li><li>The archive is sent to the configured destination.</li><li>A final workflow result reports the outcome of the major stages.</li></ol>
-<div class="callout">ZIP creation and outbound delivery are still being completed. The site labels those stages accordingly rather than presenting planned behavior as finished functionality.</div>
-<h2>Intended result collection</h2><pre><code>Start Workflow
+<section class="content">
+<h2>Two-part workflow with a manual review checkpoint</h2>
+<p>The application intentionally separates <strong>Export</strong> from <strong>Send</strong>. After files are generated, the user reviews and can modify them manually before continuing. This keeps a human approval step between automated extraction and outbound delivery.</p>
+
+<div class="workflow-stage"><div class="stage-number">1</div><div><h3>Export emails to review files</h3><p><strong>TXT URL:</strong> <code>http://localhost:8080/api/export?format=text</code><br><strong>DOCX URL:</strong> <code>http://localhost:8080/api/export?format=word</code></p><p>A REST export request authenticates with Gmail, retrieves messages from the configured source label, extracts and filters the content, and creates TXT or DOCX files in <code>processed_review/</code>. Each exported filename includes the Gmail message ID so the same source message can be recognized later.</p></div></div>
+<figure class="screenshot"><img src="../assets/images/01-export-result.svg" alt="Example processed_review folder after exporting two Gmail messages"><figcaption>Example: after Export, the generated files are waiting in <code>processed_review/</code>.</figcaption></figure>
+
+<div class="workflow-stage human"><div class="stage-number">Review</div><div><h3>User manually reviews and modifies the files</h3><p><strong>This happens between Step 1 and Step 2.</strong> Open the generated files, review the extracted job-email content, make any needed corrections or deletions, and save the files. The application does not automatically continue to Send.</p></div></div>
+<figure class="screenshot"><img src="../assets/images/02-manual-review.svg" alt="Example of manually reviewing and editing an exported email file"><figcaption>Example: review and modify each file as needed before starting Send.</figcaption></figure>
+
+<div class="workflow-stage"><div class="stage-number">2</div><div><h3>Send the reviewed files</h3><p><strong>TXT URL:</strong> <code>http://localhost:8080/api/send?format=text</code><br><strong>DOCX URL:</strong> <code>http://localhost:8080/api/send?format=word</code></p><p>After the manual review is complete, open the appropriate Send URL. The Send workflow first checks the reviewed files against <code>sent_archive_email/</code> using the Gmail message ID. Already-sent messages are moved to <code>duplicate/</code>. New files are packaged into a ZIP in <code>ready_to_send/</code> and sent through Gmail.</p></div></div>
+<figure class="screenshot"><img src="../assets/images/03-send-result.svg" alt="Example folders after a successful send"><figcaption>Example: after a successful Send, individual files and the exact ZIP are retained in separate sent archives.</figcaption></figure>
+
+<h2>What happens to duplicates?</h2>
+<p>If a Gmail message ID already exists in <code>sent_archive_email/</code>, that file is not sent again. It is moved to <code>duplicate/</code>. If the same filename already exists there, the application preserves both files by adding <code>_2</code>, <code>_3</code>, and so on.</p>
+<figure class="screenshot"><img src="../assets/images/04-duplicate-result.svg" alt="Example duplicate directory and duplicate-only workflow result"><figcaption>Example: duplicate-only run. No new ZIP is created and no email is sent.</figcaption></figure>
+
+<h2>End-to-end sequence</h2>
+<pre><code>PART 1 — EXPORT
+Gmail source label
       ↓
-Retrieve Emails → record emails found
+Retrieve + extract + filter
       ↓
-Generate Files  → record saved / failed
+processed_review/
       ↓
-Create ZIP      → record ZIP result
+STOP
+
+USER MANUAL REVIEW
+Open generated TXT/DOCX files
       ↓
-Send Email      → record delivery result
+Review and modify content
       ↓
-Determine completion
+Save reviewed files
       ↓
-Return final workflow report</code></pre>
-<h2>Why one orchestrated workflow?</h2><p>These operations represent one user goal: process the selected email set and produce a usable result. Keeping orchestration in one workflow makes the business sequence visible while allowing each technical concern to remain independently maintainable.</p></section>
+User starts Send
+
+PART 2 — SEND
+Check Gmail message IDs
+      ↓
+Already sent? ── Yes → duplicate/ → do not send
+      │
+      No
+      ↓
+Create ZIP → ready_to_send/
+      ↓
+Send through Gmail
+      ↓ success
+Individual files → sent_archive_email/
+Exact ZIP        → sent_archive_zip/
+ready_to_send/   → empty</code></pre>
+
+<h2>Failure safety</h2>
+<p>If Gmail delivery fails, the reviewed source files remain available and are not moved into the sent archive. The temporary ZIP is removed so the next attempt can create a fresh package. If Gmail succeeds but a later archive operation fails, the workflow report preserves that partial-success state instead of reporting a false full success.</p>
+<div class="callout"><strong>Why the pause matters:</strong> automation prepares the material, but the user remains in control of what is actually sent. Export and Send are deliberately separate operations.</div>
+</section>
 </main></div>
 <footer class="footer">Java 17 · Spring Boot · Gmail API · OAuth 2.0 · Apache POI · Maven</footer>
 <script src="../assets/js/site.js"></script></body></html>

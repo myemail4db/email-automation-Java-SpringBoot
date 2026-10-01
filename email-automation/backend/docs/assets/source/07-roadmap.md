@@ -2,74 +2,88 @@
 
 ## Overview
 
-The immediate priority is to complete Version 1.
+The core Java Spring Boot email automation workflow is now implemented and verified end to end. Gmail retrieval, export, the manual review checkpoint, duplicate prevention, ZIP creation, outbound delivery, sent-file archiving, sent-ZIP archiving, and workflow reporting are complete.
 
-Version 1 is intended to provide functionality equivalent to the original Python email automation program while using an independent Java Spring Boot architecture and implementation approach.
+Development now moves from completing the core workflow to adding additional ways to operate and strengthen the application.
 
-## Version 1 Goal
+## Core Workflow — Completed
 
 ```text
-Gmail Authentication       Completed
+Gmail Authentication             Completed
         |
-Email Retrieval            Completed
+Email Retrieval                  Completed
         |
-Content Extraction         Completed
+Content Extraction               Completed
         |
-Text Filtering             Completed
+Text Filtering                   Completed
         |
-TXT / DOCX Export          Completed
+TXT / DOCX Export                Completed
         |
-ZIP Processing             In Development
+Manual User Review               Completed
         |
-Outbound Email             In Development
+Gmail-ID Duplicate Detection     Completed
         |
-Workflow Reporting         Planned
+ZIP Processing                   Completed
+        |
+Outbound Email                   Completed
+        |
+Sent File / ZIP Archiving        Completed
+        |
+Workflow Reporting               Completed
+        |
+Runtime Validation               Completed
 ```
 
-Version 1 will be considered functionally complete when the entire workflow can run successfully from beginning to end.
+The completed workflow was verified with automated tests and real Gmail runs, including successful delivery, duplicate rejection, and repeated duplicate filename collision handling.
 
-## Remaining Work
+## Next: Command-Line Interface
 
-### Complete ZIP Processing
+The next development step is a command-line interface (CLI) that uses the same service layer as the web/API interface.
 
-Verify generated files, TXT and DOCX archive behavior, ZIP filenames, destination handling, duplicate filename handling, resource cleanup, error handling, and workflow integration.
+Planned commands will provide operations such as:
 
-### Complete Outbound Email Delivery
+```text
+java -jar email-automation.jar export text
+java -jar email-automation.jar export word
+java -jar email-automation.jar send text
+java -jar email-automation.jar send word
+```
 
-Reuse the Gmail authentication architecture, create the outbound message, configure the destination, attach the generated archive, send through Gmail, and return the delivery result.
+The CLI will call `EmailExportService` and `EmailSendService` rather than duplicating workflow logic. This keeps the web/API and command-line interfaces as separate entry points into the same application services.
 
-### Complete Workflow Reporting
+## Later Enhancements
 
-Accumulate processing results as each major stage completes:
+### Security Hardening
 
-- emails found
-- files saved
-- files failed
-- ZIP created
-- email sent
-- workflow completed
+- stronger protection for OAuth tokens and credentials
+- encrypted ZIP exports
+- separate secure delivery of ZIP access credentials when encryption is added
+- additional configuration validation and recovery safeguards
 
-### Expand Representative Test Coverage
+### User Review Experience
 
-Add tests around Gmail retrieval, filtering, file processing, ZIP processing, outbound delivery, and complete workflow orchestration.
+- possible React-based filtering, preview, and review interface
+- clearer workflow progress and result presentation
+- preserve the manual review checkpoint before sending
 
-## Future Development
+### Monitoring and Diagnostics
 
-Possible post-Version 1 enhancements include:
+- expanded workflow monitoring
+- execution history and audit-friendly status information
+- improved operational diagnostics and recovery information
 
-- React-based filtering, preview, and user review
-- security hardening and secure credential storage
-- protected ZIP archives
-- secure backup and recovery
-- workflow monitoring and history
-- additional email provider support
+### Additional Integrations
+
+- additional email provider support where useful
+- preserve provider-specific code behind service boundaries
 
 ## Development Principles
 
 - preserve clear service responsibilities
-- keep the primary business workflow understandable
-- add functionality at the appropriate point in the workflow
+- reuse the same business services across web/API and CLI interfaces
+- keep the manual review checkpoint explicit
+- prevent previously sent Gmail messages from being resent
+- preserve exact sent artifacts for troubleshooting and auditability
 - keep external integrations separated from internal processing logic
 - maintain user control over Gmail messages
-- avoid automatically modifying the user's Inbox
 - document functionality as completed only after implementation and verification

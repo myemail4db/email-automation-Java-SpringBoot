@@ -1,33 +1,32 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>Engineering Decisions | Email Automation</title>
-<meta name="description" content="Java Spring Boot Email Automation portfolio case study">
-<link rel="stylesheet" href="../assets/css/site.css"></head>
+<meta content="Java Spring Boot Email Automation portfolio case study" name="description"/>
+<link href="../assets/css/site.css" rel="stylesheet"/></head>
 <body>
 <header class="topbar"><div class="topbar-inner"><a class="brand" href="../index.html">Email Automation</a>
 <nav class="toplinks"><a href="../pages/architecture.html">Architecture</a><a href="../pages/status.html">Status</a><a href="../pages/setup.html">Run locally</a></nav></div></header>
 <div class="layout">
 <aside class="sidebar">
-  <div class="label">Case Study</div>
-  <a href="../index.html">Overview</a>
-  <a href="project-background.html">Project Background</a>
-  <a href="architecture.html">Architecture</a>
-  <a href="workflow.html">Workflow</a>
-  <a href="engineering.html" class="active">Engineering Decisions</a>
-  <a href="api.html">API</a>
-  <a href="setup.html">Setup & Run</a>
-  <a href="gmail-oauth.html">Gmail & OAuth Setup</a>
-  <a href="customize.html">Customize the Application</a>
-  <a href="status.html">Current Status</a>
-  <a href="roadmap.html">Roadmap</a>
-</aside><main><div class="crumbs"><a href="../index.html">Email Automation</a> &nbsp;/&nbsp; Engineering Decisions</div>
-<div class="kicker">Implementation choices</div><h1>Engineering Decisions</h1>
-<section class="content"><h2>Service separation</h2><p>External API access, content processing, file handling, archiving, and delivery are separated instead of being embedded in controllers. Controllers remain focused on HTTP interaction while services perform the work.</p>
-<h2>Defensive processing</h2><p>The workflow checks common failure conditions including missing export formats, null service results, empty email collections, invalid content, and failed file saves. The goal is a meaningful workflow result instead of an uncontrolled failure.</p>
-<h2>Duplicate filenames</h2><p>Generated files use readable job-oriented names. When a filename already exists, the export logic adds a numeric suffix rather than overwriting the existing file.</p>
-<h2>Resource handling</h2><p>File and ZIP operations use scoped resource management so streams are closed reliably even when processing fails.</p>
-<h2>Testing strategy</h2><p>JUnit 5 and Mockito are used for representative automated testing. Current tests cover Spring context loading, dependency mocking, defensive behavior, and successful workflow behavior. Planned coverage targets important boundaries such as Gmail retrieval, filtering, file processing, ZIP creation, outbound delivery, and orchestration.</p>
-<h2>Security posture</h2><p>OAuth credentials, access tokens, refresh tokens, and other sensitive configuration should not be committed to source control. Logging should provide useful operational detail without exposing Gmail or OAuth secrets. Additional credential protection, archive protection, integrity checks, and recovery controls are roadmap items.</p></section>
-</main></div>
+<div class="label">Case Study</div>
+<a href="../index.html">Overview</a>
+<a href="project-background.html">Project Background</a>
+<a href="architecture.html">Architecture</a>
+<a href="workflow.html">Workflow</a>
+<a class="active" href="engineering.html">Engineering Decisions</a>
+<a href="api.html">API</a>
+<a href="setup.html">Setup &amp; Run</a>
+<a href="gmail-oauth.html">Gmail &amp; OAuth Setup</a>
+<a href="customize.html">Customize the Application</a>
+<a href="status.html">Current Status</a>
+<a href="roadmap.html">Roadmap</a>
+</aside><main><div class="crumbs"><a href="../index.html">Email Automation</a>  /  Engineering Decisions</div><div class="kicker">Why the implementation works this way</div><h1>Engineering Decisions</h1><section class="content"><h2>Gmail message ID is the duplicate identity</h2><p>Duplicate detection is based on the Gmail message ID rather than generated-file content. Re-exporting the same Gmail message can produce different bytes, so a file hash answers the wrong business question. Exported filenames therefore retain identity as <code>_GMAIL-&lt;messageId&gt;</code>.</p>
+<h2>Duplicates are rejected before ZIP creation</h2><p><code>ArchiveService</code> compares Gmail IDs in <code>processed_review/</code> with IDs already present in <code>sent_archive_email/</code>. Previously sent messages move to <code>duplicate/</code> and are excluded from the ZIP. If the same duplicate filename already exists, the new copy is preserved with <code>_2</code>, <code>_3</code>, and later suffixes instead of overwriting evidence.</p>
+<h2>Sent files and sent packages are separate</h2><p><code>sent_archive_email/</code> is the authoritative record used for per-message duplicate detection. <code>sent_archive_zip/</code> preserves the exact ZIP package that was successfully delivered.</p>
+<h2>Failure behavior is deliberate</h2><p>If Gmail delivery fails, reviewed source files remain available and the temporary ZIP is deleted. If Gmail succeeds but a later archive step fails, the report records the partial success rather than claiming the entire operation failed before delivery.</p>
+<h2>Workflow reporting</h2><p><code>WorkflowReport</code> carries outcome information across Export and Send, including counts, ZIP creation, email delivery, archive results, completion state, timing, and status messages.</p>
+<h2>Testing approach</h2><p>JUnit 5 and Mockito tests were used with a Red → Green → Refactor workflow for duplicate identity, duplicate-directory collision handling, ZIP archival, failed-send cleanup, and partial-success behavior. The completed lifecycle was then verified with real Gmail runs.</p>
+<h2>Java engineering improvement</h2><p>The Python implementation remains the proven functional baseline. The Java version deliberately strengthens the lifecycle with Gmail-ID duplicate prevention and separate sent-email and sent-ZIP archives rather than copying every implementation detail from Python.</p></section><div class="next"><a href="api.html">Next: API →</a></div></main></div>
 <footer class="footer">Java 17 · Spring Boot · Gmail API · OAuth 2.0 · Apache POI · Maven</footer>
 <script src="../assets/js/site.js"></script></body></html>

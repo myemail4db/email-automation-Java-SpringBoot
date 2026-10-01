@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="460" viewBox="0 0 1100 460">
+<rect width="1100" height="460" rx="18" fill="#eef2f7"/><rect x="28" y="28" width="1044" height="404" rx="12" fill="#fff" stroke="#d7dee8"/>
+<rect x="28" y="28" width="1044" height="48" rx="12" fill="#f8fafc"/><circle cx="55" cy="52" r="6" fill="#c7ced8"/><circle cx="76" cy="52" r="6" fill="#c7ced8"/><circle cx="97" cy="52" r="6" fill="#c7ced8"/>
+<text x="130" y="58" font-family="Arial,sans-serif" font-size="16" fill="#344054">processed_review</text>
+<text x="62" y="116" font-family="Arial,sans-serif" font-size="14" fill="#667085">NAME</text><text x="850" y="116" font-family="Arial,sans-serif" font-size="14" fill="#667085">TYPE</text>
+<line x1="55" y1="132" x2="1045" y2="132" stroke="#e5e9ef"/>
+<text x="64" y="178" font-family="monospace" font-size="17" fill="#172033">Web Python Developer_GMAIL-19d46c2669b19b6f.txt</text><text x="850" y="178" font-family="Arial,sans-serif" font-size="15" fill="#475467">Text</text>
+<line x1="55" y1="198" x2="1045" y2="198" stroke="#eef1f5"/>
+<text x="64" y="244" font-family="monospace" font-size="17" fill="#172033">Technical Engineer_GMAIL-19d46b78db99b309.txt</text><text x="850" y="244" font-family="Arial,sans-serif" font-size="15" fill="#475467">Text</text>
+<rect x="55" y="302" width="990" height="92" rx="8" fill="#f6f9ff"/><text x="76" y="337" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="#174ea6">Expected after Export</text><text x="76" y="367" font-family="Arial,sans-serif" font-size="15" fill="#475467">Review these generated files before starting the Send workflow.</text>
+</svg>

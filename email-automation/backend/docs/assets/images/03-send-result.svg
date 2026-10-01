@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="500" viewBox="0 0 1100 500">
+<rect width="1100" height="500" rx="18" fill="#eef2f7"/><rect x="28" y="28" width="1044" height="444" rx="12" fill="#fff" stroke="#d7dee8"/>
+<rect x="28" y="28" width="1044" height="48" rx="12" fill="#f8fafc"/><text x="55" y="59" font-family="Arial,sans-serif" font-size="16" fill="#344054">Successful Send — expected local folders</text>
+<text x="62" y="118" font-family="monospace" font-size="17" font-weight="bold" fill="#172033">sent_archive_email/</text><text x="86" y="154" font-family="monospace" font-size="16" fill="#344054">Web Python Developer_GMAIL-19d46c2669b19b6f.txt</text><text x="86" y="184" font-family="monospace" font-size="16" fill="#344054">Technical Engineer_GMAIL-19d46b78db99b309.txt</text>
+<text x="62" y="238" font-family="monospace" font-size="17" font-weight="bold" fill="#172033">sent_archive_zip/</text><text x="86" y="274" font-family="monospace" font-size="16" fill="#344054">job_batch_20260930_193100.zip</text>
+<text x="62" y="328" font-family="monospace" font-size="17" font-weight="bold" fill="#172033">ready_to_send/</text><text x="86" y="362" font-family="monospace" font-size="16" fill="#667085">(empty after successful delivery)</text>
+<rect x="55" y="398" width="990" height="46" rx="8" fill="#eaf7f0"/><text x="76" y="427" font-family="Arial,sans-serif" font-size="15" font-weight="bold" fill="#18794e">Email sent → individual files archived → exact ZIP archived</text>
+</svg>

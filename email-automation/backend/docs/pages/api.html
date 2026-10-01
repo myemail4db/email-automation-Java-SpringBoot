@@ -1,38 +1,34 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>API | Email Automation</title>
-<meta name="description" content="Java Spring Boot Email Automation portfolio case study">
-<link rel="stylesheet" href="../assets/css/site.css"></head>
+<meta content="Java Spring Boot Email Automation portfolio case study" name="description"/>
+<link href="../assets/css/site.css" rel="stylesheet"/></head>
 <body>
 <header class="topbar"><div class="topbar-inner"><a class="brand" href="../index.html">Email Automation</a>
 <nav class="toplinks"><a href="../pages/architecture.html">Architecture</a><a href="../pages/status.html">Status</a><a href="../pages/setup.html">Run locally</a></nav></div></header>
 <div class="layout">
 <aside class="sidebar">
-  <div class="label">Case Study</div>
-  <a href="../index.html">Overview</a>
-  <a href="project-background.html">Project Background</a>
-  <a href="architecture.html">Architecture</a>
-  <a href="workflow.html">Workflow</a>
-  <a href="engineering.html">Engineering Decisions</a>
-  <a href="api.html" class="active">API</a>
-  <a href="setup.html">Setup & Run</a>
-  <a href="gmail-oauth.html">Gmail & OAuth Setup</a>
-  <a href="customize.html">Customize the Application</a>
-  <a href="status.html">Current Status</a>
-  <a href="roadmap.html">Roadmap</a>
-</aside><main><div class="crumbs"><a href="../index.html">Email Automation</a> &nbsp;/&nbsp; API</div>
-<div class="kicker">REST interface</div><h1>API</h1>
-<section class="content"><p>The backend exposes REST endpoints for application health, Gmail integration, and workflow processing. The API provides a simple way to inspect the application during development and exercise the workflow without requiring a frontend.</p>
-<table><tr><th>Method</th><th>Endpoint</th><th>Purpose</th></tr>
-<tr><td>GET</td><td><code>/api/health</code></td><td>Verify that the Spring Boot application is running.</td></tr>
-<tr><td>GET</td><td><code>/api/gmail/status</code></td><td>Validate Gmail integration/connectivity.</td></tr>
-<tr><td>GET</td><td><code>/api/gmail/emails</code></td><td>Retrieve messages through the Gmail integration.</td></tr>
-<tr><td>GET</td><td><code>/api/export</code></td><td>Start the email export workflow using the requested format.</td></tr></table>
-<h2>Example</h2><pre><code>curl http://localhost:8080/api/health
-
-# Example export request
-curl "http://localhost:8080/api/export?format=text"</code></pre>
-<p class="muted">The exact workflow response can evolve while Version 1 reporting is being completed.</p></section>
-</main></div>
+<div class="label">Case Study</div>
+<a href="../index.html">Overview</a>
+<a href="project-background.html">Project Background</a>
+<a href="architecture.html">Architecture</a>
+<a href="workflow.html">Workflow</a>
+<a href="engineering.html">Engineering Decisions</a>
+<a class="active" href="api.html">API</a>
+<a href="setup.html">Setup &amp; Run</a>
+<a href="gmail-oauth.html">Gmail &amp; OAuth Setup</a>
+<a href="customize.html">Customize the Application</a>
+<a href="status.html">Current Status</a>
+<a href="roadmap.html">Roadmap</a>
+</aside><main><div class="crumbs"><a href="../index.html">Email Automation</a>  /  API</div><div class="kicker">REST endpoints</div><h1>API</h1><section class="content"><p>The Spring Boot backend exposes REST endpoints for health checks, Gmail inspection, Export, and Send. Export and Send are intentionally separate because the user manually reviews the generated files between them.</p>
+<h2>Endpoint summary</h2><table><tr><th>Method</th><th>Endpoint</th><th>Purpose</th></tr><tr><td>GET</td><td><code>/api/health</code></td><td>Application health check.</td></tr><tr><td>GET</td><td><code>/api/gmail/status</code></td><td>Verify Gmail connectivity/status.</td></tr><tr><td>GET</td><td><code>/api/gmail/emails</code></td><td>Inspect messages returned by the Gmail integration.</td></tr><tr><td>GET</td><td><code>/api/emails</code></td><td>Email controller endpoint available in the current application.</td></tr><tr><td>GET</td><td><code>/api/export</code></td><td>Export messages to TXT or DOCX for manual review. The optional <code>format</code> parameter defaults to <code>text</code>.</td></tr><tr><td>GET</td><td><code>/api/send</code></td><td>Send manually reviewed files. The optional <code>format</code> parameter defaults to <code>text</code>.</td></tr></table>
+<h2>Export</h2><pre><code>http://localhost:8080/api/export
+http://localhost:8080/api/export?format=text
+http://localhost:8080/api/export?format=word</code></pre><p><code>/api/export</code> and <code>/api/export?format=text</code> are equivalent with the current default configuration.</p>
+<h2>Manual review</h2><p>After Export, open the files in <code>processed_review/</code>, review or modify them, and save the changes. Send does not start automatically.</p>
+<h2>Send</h2><pre><code>http://localhost:8080/api/send
+http://localhost:8080/api/send?format=text
+http://localhost:8080/api/send?format=word</code></pre><p><code>/api/send</code> defaults to <code>text</code>. During Send, duplicate Gmail IDs are removed from the outgoing batch before ZIP creation.</p></section><div class="next"><a href="setup.html">Next: Setup &amp; Run →</a></div></main></div>
 <footer class="footer">Java 17 · Spring Boot · Gmail API · OAuth 2.0 · Apache POI · Maven</footer>
 <script src="../assets/js/site.js"></script></body></html>

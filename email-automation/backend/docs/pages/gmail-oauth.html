@@ -25,7 +25,7 @@
 <p class="lead">Set up Google Cloud, create the desktop OAuth client, place the downloaded credentials where this application actually expects them, authorize Gmail, and verify each layer before running the full workflow.</p>
 <section class="content">
 <h2>Before you start</h2>
-<p>You need a Google account with Gmail enabled and a Google Cloud project. This application requests Gmail read-only and Gmail send access. The OAuth client type used by this project is a <strong>Desktop app</strong>.</p>
+<p>You need a Google account with Gmail enabled and a Google Cloud project. This application requests Gmail read-only, Gmail modify, and Gmail send access. The OAuth client type used by this project is a <strong>Desktop app</strong>.</p>
 <div class="callout"><strong>Important:</strong> Never commit <code>credentials.json</code>, the generated <code>tokens/</code> directory, or <code>application-private.properties</code>. The project <code>.gitignore</code> is configured to exclude them.</div>
 
 <h2>1. Create or select a Google Cloud project</h2>
@@ -42,7 +42,7 @@
 
 <h2>4. Review the Gmail permissions</h2>
 <p>The current Java authentication service requests these Gmail permissions:</p>
-<ul><li><strong>Gmail read-only</strong> — used to retrieve and read messages selected for processing.</li><li><strong>Gmail send</strong> — used by the outbound email stage.</li></ul>
+<ul><li><strong>Gmail read-only</strong> — used to retrieve and read messages selected for processing.</li><li><strong>Gmail modify</strong> — used to update workflow labels after processing.</li><li><strong>Gmail send</strong> — used by the outbound email stage.</li></ul>
 <p>For an External application, use Google Auth Platform → <strong>Data Access</strong> to configure the authorization scopes required by the application when needed by the Google Auth setup.</p>
 
 <h2>5. Create a Desktop OAuth client</h2>
@@ -68,8 +68,7 @@
 <p>In the same resources directory, create or update:</p>
 <pre><code>backend/src/main/resources/application-private.properties</code></pre>
 <p>Use your own addresses:</p>
-<pre><code>email.gmail.source-account=your-gmail-address@example.com
-email.send.recipient=destination-address@example.com</code></pre>
+<pre><code>email.gmail.recipient=destination-address@example.com</code></pre>
 <p><code>application.properties</code> imports this private file with <code>spring.config.import=optional:classpath:application-private.properties</code>.</p>
 
 <h2>8. Configure the Gmail labels</h2>

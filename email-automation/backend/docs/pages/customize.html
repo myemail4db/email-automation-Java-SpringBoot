@@ -1,74 +1,31 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>Customize the Application | Email Automation</title>
-<meta name="description" content="Java Spring Boot Email Automation portfolio case study">
-<link rel="stylesheet" href="../assets/css/site.css"></head>
+<meta content="Java Spring Boot Email Automation portfolio case study" name="description"/>
+<link href="../assets/css/site.css" rel="stylesheet"/></head>
 <body>
 <header class="topbar"><div class="topbar-inner"><a class="brand" href="../index.html">Email Automation</a>
 <nav class="toplinks"><a href="../pages/architecture.html">Architecture</a><a href="../pages/status.html">Status</a><a href="../pages/setup.html">Run locally</a></nav></div></header>
 <div class="layout">
 <aside class="sidebar">
-  <div class="label">Case Study</div>
-  <a href="../index.html">Overview</a>
-  <a href="project-background.html">Project Background</a>
-  <a href="architecture.html">Architecture</a>
-  <a href="workflow.html">Workflow</a>
-  <a href="engineering.html">Engineering Decisions</a>
-  <a href="api.html">API</a>
-  <a href="setup.html">Setup & Run</a>
-  <a href="gmail-oauth.html">Gmail & OAuth Setup</a>
-  <a href="customize.html" class="active">Customize the Application</a>
-  <a href="status.html">Current Status</a>
-  <a href="roadmap.html">Roadmap</a>
-</aside><main><div class="crumbs"><a href="../index.html">Email Automation</a> &nbsp;/&nbsp; <a href="setup.html">Setup &amp; Run</a> &nbsp;/&nbsp; Customize the Application</div>
-<div class="kicker">Configuration reference</div><h1>Customize the Application</h1>
-<p class="lead">Change Gmail labels, local directories, ZIP naming, export format, and user-specific email settings without changing Java source code.</p>
-<section class="content">
-<h2>Where the configuration files go</h2>
-<pre><code>backend/
-└── src/
-    └── main/
-        └── resources/
-            ├── application.properties
-            ├── application-private.properties
-            └── credentials.json</code></pre>
-<p><code>application.properties</code> is the normal application configuration. <code>application-private.properties</code> contains user-specific email addresses and is excluded from Git. <code>credentials.json</code> is the downloaded Google Desktop OAuth client and is also excluded from Git.</p>
-<h2>Current application.properties</h2>
-<table><thead><tr><th>Property</th><th>Current example</th><th>What it controls</th></tr></thead><tbody>
-<tr><td><code>spring.application.name</code></td><td><code>email-automation</code></td><td>Spring Boot application name.</td></tr>
-<tr><td><code>spring.config.import</code></td><td><code>optional:classpath:application-private.properties</code></td><td>Loads the user's private configuration from the classpath when present.</td></tr>
-<tr><td><code>server.port</code></td><td><code>8080</code></td><td>Local Spring Boot HTTP port.</td></tr>
-<tr><td><code>logging.level.root</code></td><td><code>INFO</code></td><td>Root logging level.</td></tr>
-<tr><td><code>logging.level.com.example.email_automation</code></td><td><code>DEBUG</code></td><td>Application-package logging level.</td></tr>
-<tr><td><code>logging.file.name</code></td><td><code>logs/email-automation.log</code></td><td>Application log file.</td></tr>
-<tr><td><code>email.gmail.source-label</code></td><td><code>for_friend</code></td><td>Gmail label containing messages to process.</td></tr>
-<tr><td><code>email.gmail.success-label</code></td><td><code>for_friend/processed_review</code></td><td>Configured Gmail success label.</td></tr>
-<tr><td><code>email.gmail.fail-label</code></td><td><code>for_friend/error</code></td><td>Configured Gmail failure label.</td></tr>
-<tr><td><code>email.files.processed-dir</code></td><td><code>processed_review</code></td><td>Local directory for processed/review files.</td></tr>
-<tr><td><code>email.files.archive-dir</code></td><td><code>sent_archive</code></td><td>Local archive directory.</td></tr>
-<tr><td><code>email.files.error-dir</code></td><td><code>error</code></td><td>Local error directory.</td></tr>
-<tr><td><code>email.files.zip-dir</code></td><td><code>ready_to_send</code></td><td>Local directory for ZIP output.</td></tr>
-<tr><td><code>email.files.zip-prefix</code></td><td><code>job_batch</code></td><td>Prefix used for ZIP naming.</td></tr>
-<tr><td><code>email.export.default-format</code></td><td><code>text</code></td><td>Default export format.</td></tr>
-</tbody></table>
-<h2>application-private.properties</h2><p>Create this file locally under <code>backend/src/main/resources/</code>:</p>
-<pre><code>email.gmail.source-account=your-gmail-address@example.com
-email.send.recipient=destination-address@example.com</code></pre>
-<table><thead><tr><th>Property</th><th>What to enter</th></tr></thead><tbody>
-<tr><td><code>email.gmail.source-account</code></td><td>The Gmail account used by this installation/workflow.</td></tr>
-<tr><td><code>email.send.recipient</code></td><td>The destination address for outbound delivery.</td></tr>
-</tbody></table>
-<div class="callout"><strong>Private files:</strong> Do not commit <code>application-private.properties</code>, <code>credentials.json</code>, or <code>tokens/</code>. A fresh clone requires each user to create/download their own private files.</div>
-<h2>Common customizations</h2>
-<h3>Process a different Gmail label</h3><pre><code>email.gmail.source-label=my_source_label</code></pre>
-<p>If you change the workflow labels, make sure the corresponding labels exist in the Gmail account.</p>
-<h3>Change the local review directory</h3><pre><code>email.files.processed-dir=my_review_directory</code></pre>
-<h3>Change where ZIP files are created</h3><pre><code>email.files.zip-dir=my_zip_directory</code></pre>
-<h3>Change the ZIP prefix</h3><pre><code>email.files.zip-prefix=my_batch</code></pre>
-<h3>Use DOCX as the default</h3><pre><code>email.export.default-format=word</code></pre>
-<p>The current workflow endpoint supports <code>text</code> and <code>word</code>.</p>
-<h3>Change the Gmail account or recipient</h3><p>Edit only your local <code>application-private.properties</code>.</p>
-<h2>Need Gmail authentication help?</h2><p>The <a href="gmail-oauth.html">Gmail &amp; OAuth Setup</a> page explains how to create <code>credentials.json</code>, exactly where to place it, how the <code>tokens/</code> directory is generated, and how to troubleshoot authorization.</p>
-</section><div class="next"><a href="status.html">Next: Current Status →</a></div></main></div>
+<div class="label">Case Study</div>
+<a href="../index.html">Overview</a>
+<a href="project-background.html">Project Background</a>
+<a href="architecture.html">Architecture</a>
+<a href="workflow.html">Workflow</a>
+<a href="engineering.html">Engineering Decisions</a>
+<a href="api.html">API</a>
+<a href="setup.html">Setup &amp; Run</a>
+<a href="gmail-oauth.html">Gmail &amp; OAuth Setup</a>
+<a class="active" href="customize.html">Customize the Application</a>
+<a href="status.html">Current Status</a>
+<a href="roadmap.html">Roadmap</a>
+</aside><main><div class="crumbs"><a href="../index.html">Email Automation</a>  /  Customize the Application</div><div class="kicker">Configuration reference</div><h1>Customize the Application</h1><section class="content"><p>Most workflow behavior can be changed through Spring Boot properties without editing Java source code.</p>
+<h2>Gmail workflow labels</h2><table><tr><th>Property</th><th>Example</th><th>Purpose</th></tr><tr><td><code>email.gmail.source-label</code></td><td><code>for_friend</code></td><td>Messages selected for Export.</td></tr><tr><td><code>email.gmail.success-label</code></td><td><code>for_friend/processed_review</code></td><td>Gmail label applied after successful export.</td></tr><tr><td><code>email.gmail.fail-label</code></td><td><code>for_friend/error</code></td><td>Gmail label used for export failures.</td></tr></table>
+<h2>Local directories</h2><table><tr><th>Property</th><th>Example</th><th>Purpose</th></tr><tr><td><code>email.files.processed-dir</code></td><td><code>processed_review</code></td><td>TXT/DOCX files waiting for manual review and Send.</td></tr><tr><td><code>email.files.zip-dir</code></td><td><code>ready_to_send</code></td><td>Temporary ZIP staging directory.</td></tr><tr><td><code>email.files.archive-dir</code></td><td><code>sent_archive_email</code></td><td>Individual files confirmed as sent. Used for Gmail-ID duplicate detection.</td></tr><tr><td><code>email.files.zip-archive-dir</code></td><td><code>sent_archive_zip</code></td><td>Exact ZIP packages successfully sent.</td></tr><tr><td><code>email.files.duplicate-dir</code></td><td><code>duplicate</code></td><td>Files rejected because their Gmail ID was already sent.</td></tr><tr><td><code>email.files.zip-prefix</code></td><td><code>job_batch</code></td><td>ZIP filename prefix.</td></tr></table>
+<h2>Export default</h2><pre><code>email.export.default-format=text</code></pre><p>Supported workflow formats are <code>text</code> and <code>word</code>. Omitting <code>format</code> from <code>/api/export</code> uses this configured default. <code>/api/send</code> currently defaults its optional format parameter to <code>text</code>.</p>
+<h2>Private configuration</h2><p>The outbound recipient is supplied through private configuration using <code>email.gmail.recipient</code>. Keep private properties, OAuth credentials, tokens, logs, generated review files, duplicates, and sent archives out of source control.</p>
+<div class="callout"><strong>Important:</strong> if Gmail label names are changed, create or verify the corresponding labels in the Gmail account before running Export.</div></section><div class="next"><a href="status.html">Next: Current Status →</a></div></main></div>
 <footer class="footer">Java 17 · Spring Boot · Gmail API · OAuth 2.0 · Apache POI · Maven</footer>
 <script src="../assets/js/site.js"></script></body></html>

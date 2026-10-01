@@ -1,60 +1,50 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>Architecture | Email Automation</title>
-<meta name="description" content="Java Spring Boot Email Automation portfolio case study">
-<link rel="stylesheet" href="../assets/css/site.css"></head>
+<meta content="Java Spring Boot Email Automation portfolio case study" name="description"/>
+<link href="../assets/css/site.css" rel="stylesheet"/></head>
 <body>
 <header class="topbar"><div class="topbar-inner"><a class="brand" href="../index.html">Email Automation</a>
 <nav class="toplinks"><a href="../pages/architecture.html">Architecture</a><a href="../pages/status.html">Status</a><a href="../pages/setup.html">Run locally</a></nav></div></header>
 <div class="layout">
 <aside class="sidebar">
-  <div class="label">Case Study</div>
-  <a href="../index.html">Overview</a>
-  <a href="project-background.html">Project Background</a>
-  <a href="architecture.html" class="active">Architecture</a>
-  <a href="workflow.html">Workflow</a>
-  <a href="engineering.html">Engineering Decisions</a>
-  <a href="api.html">API</a>
-  <a href="setup.html">Setup & Run</a>
-  <a href="gmail-oauth.html">Gmail & OAuth Setup</a>
-  <a href="customize.html">Customize the Application</a>
-  <a href="status.html">Current Status</a>
-  <a href="roadmap.html">Roadmap</a>
-</aside><main><div class="crumbs"><a href="../index.html">Email Automation</a> &nbsp;/&nbsp; Architecture</div>
-<div class="kicker">System design</div><h1>Architecture</h1>
-<section class="content"><p>Email Automation is a Java 17 Spring Boot application built around a REST-driven workflow. <code>EmailExportService</code> is the primary orchestrator. Specialized services own individual responsibilities so the end-to-end flow remains understandable without turning one class into a kitchen sink.</p>
-<h2>Component flow</h2><pre><code>ExportController
-      │
-      ▼
+<div class="label">Case Study</div>
+<a href="../index.html">Overview</a>
+<a href="project-background.html">Project Background</a>
+<a class="active" href="architecture.html">Architecture</a>
+<a href="workflow.html">Workflow</a>
+<a href="engineering.html">Engineering Decisions</a>
+<a href="api.html">API</a>
+<a href="setup.html">Setup &amp; Run</a>
+<a href="gmail-oauth.html">Gmail &amp; OAuth Setup</a>
+<a href="customize.html">Customize the Application</a>
+<a href="status.html">Current Status</a>
+<a href="roadmap.html">Roadmap</a>
+</aside><main><div class="crumbs"><a href="../index.html">Email Automation</a>  /  Architecture</div><div class="kicker">System design</div><h1>Architecture</h1><section class="content"><p>Email Automation is a Java 17 Spring Boot application with two explicit workflow entry points: <strong>Export</strong> and <strong>Send</strong>. The user-facing controllers stay thin while service classes own Gmail access, extraction, filtering, file generation, duplicate detection, ZIP lifecycle, delivery, and archiving.</p>
+<h2>Export path</h2><pre><code>ExportController
+      ↓
 EmailExportService
   ├── GmailService ── GmailAuthService ── Gmail API
   ├── EmailBodyExtractorService
   ├── TextFilterService
-  ├── FileExportService ── TXT / DOCX
-  ├── ZipExportService       [in development]
-  └── EmailSendService ── Gmail API [in development]</code></pre>
-<h2>Backend structure</h2><pre><code>backend/
-├── src/
-│   ├── main/
-│   │   ├── java/com/example/email_automation/
-│   │   │   ├── controller/
-│   │   │   ├── dto/
-│   │   │   ├── model/
-│   │   │   ├── repository/
-│   │   │   └── service/
-│   │   └── resources/
-│   └── test/
-├── docs/
-└── pom.xml</code></pre>
+  └── FileExportService ── TXT / DOCX
+      ↓
+processed_review/
+      ↓
+USER MANUAL REVIEW</code></pre>
+<h2>Send path</h2><pre><code>SendController
+      ↓
+EmailSendService
+  ├── ArchiveService ── duplicate detection by Gmail message ID
+  ├── ZipExportService ── create / delete / archive ZIP
+  └── GmailService ── Gmail API send
+      ↓
+Successful send
+  ├── reviewed files → sent_archive_email/
+  └── exact ZIP      → sent_archive_zip/</code></pre>
 <h2>Responsibility boundaries</h2><table><tr><th>Component</th><th>Responsibility</th></tr>
-<tr><td><code>GmailAuthService</code></td><td>OAuth configuration, authorization flow, local token storage, authenticated Gmail client.</td></tr>
-<tr><td><code>GmailService</code></td><td>Gmail connectivity and message retrieval from the configured processing label.</td></tr>
-<tr><td><code>EmailBodyExtractorService</code></td><td>Converts Gmail message structures into the application's internal email content.</td></tr>
-<tr><td><code>TextFilterService</code></td><td>Normalizes and cleans content before export.</td></tr>
-<tr><td><code>FileExportService</code></td><td>Creates TXT and DOCX output and handles filenames.</td></tr>
-<tr><td><code>ZipExportService</code></td><td>Packages generated files into an archive.</td></tr>
-<tr><td><code>EmailSendService</code></td><td>Sends the completed archive through Gmail.</td></tr>
-<tr><td><code>EmailExportService</code></td><td>Coordinates the user-facing business workflow.</td></tr></table></section>
-</main></div>
+<tr><td><code>GmailAuthService</code></td><td>OAuth authorization, token storage, and authenticated Gmail client.</td></tr><tr><td><code>GmailService</code></td><td>Retrieve Gmail messages, update Gmail labels, and send the completed ZIP.</td></tr><tr><td><code>EmailBodyExtractorService</code></td><td>Extract Gmail content and preserve the Gmail message ID.</td></tr><tr><td><code>TextFilterService</code></td><td>Clean and normalize message content.</td></tr><tr><td><code>FileExportService</code></td><td>Create TXT/DOCX review files with <code>_GMAIL-&lt;messageId&gt;</code> identity in filenames.</td></tr><tr><td><code>ArchiveService</code></td><td>Detect previously sent Gmail IDs, move duplicates to <code>duplicate/</code>, and archive successfully sent individual files.</td></tr><tr><td><code>ZipExportService</code></td><td>Create temporary ZIPs, remove failed-send ZIPs, and archive successfully sent ZIPs.</td></tr><tr><td><code>EmailExportService</code></td><td>Coordinate Export and return a <code>WorkflowReport</code>.</td></tr><tr><td><code>EmailSendService</code></td><td>Coordinate duplicate check → ZIP → Gmail send → individual archive → ZIP archive and report partial-success states.</td></tr></table>
+<h2>Why the manual checkpoint matters</h2><p>Export intentionally stops after writing review files. The application does not automatically send them. The user opens, reviews, edits if necessary, and saves the files before explicitly starting Send.</p></section><div class="next"><a href="workflow.html">Next: Workflow →</a></div></main></div>
 <footer class="footer">Java 17 · Spring Boot · Gmail API · OAuth 2.0 · Apache POI · Maven</footer>
 <script src="../assets/js/site.js"></script></body></html>
