@@ -182,4 +182,57 @@ class EmailSendServiceTest {
                 result.getStatusMessage()
         );
     }
+
+    @Test
+    void shouldSendNewFilesWhenDuplicatesAreFound() throws Exception {
+
+        // Purpose: Verify duplicate files do not prevent
+        // new reviewed files from being sent.
+
+        // Arrange
+        ZipExportService zipExportService =
+                mock(ZipExportService.class);
+
+        GmailService gmailService =
+                mock(GmailService.class);
+
+        ArchiveService archiveService =
+                mock(ArchiveService.class);
+
+        EmailSendService emailSendService =
+                new EmailSendService(
+                        zipExportService,
+                        gmailService,
+                        archiveService
+                );
+
+        Path zipFile =
+                Path.of("ready_to_send/job_batch_test.zip");
+
+        when(archiveService.archiveDuplicateFiles("text"))
+                .thenReturn(1);
+
+        when(zipExportService.createZipEmail("text"))
+                .thenReturn(zipFile);
+
+        when(gmailService.sendZipFile(zipFile))
+                .thenReturn(true);
+
+        when(archiveService.archiveFiles("text"))
+                .thenReturn(1);
+
+        // Act
+        WorkflowReport result =
+                emailSendService.processSend("text");
+
+        // Assert
+        assertTrue(result.isEmailSent());
+        assertTrue(result.isFilesArchived());
+        assertTrue(result.isWorkflowCompleted());
+
+        verify(zipExportService).createZipEmail("text");
+        verify(gmailService).sendZipFile(zipFile);
+        verify(archiveService).archiveFiles("text");
+        verify(zipExportService).archiveZipFile(zipFile);
+    }
 }

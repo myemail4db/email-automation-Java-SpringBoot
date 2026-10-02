@@ -8,16 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.util.ReflectionTestUtils;
 
 class ArchiveServiceTest {
-
-    @Value("${email.files.processed-dir}")
-    private String processedDirectory;
-
-    @Value("${email.files.archive-dir}")
-    private String archiveDirectory;
 
     @TempDir
     Path tempDirectory;

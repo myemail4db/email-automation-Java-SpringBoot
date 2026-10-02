@@ -9,8 +9,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.example.email_automation.model.EmailMessage;
@@ -20,9 +18,6 @@ import com.google.api.services.gmail.model.MessagePartHeader;
 
 @Service
 public class EmailBodyExtractorService {
-
-    private static final Logger logger =
-        LoggerFactory.getLogger(EmailBodyExtractorService.class);
 
     public EmailMessage extractEmailMessage(Message message) {
         if (message == null) {

@@ -1,13 +1,9 @@
 package com.example.email_automation.service;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HexFormat;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,24 +103,6 @@ public class ArchiveService {
         }
 
         return fileName.substring(idStart, idEnd);
-    }
-
-    private String calculateFileHash(Path file)
-        throws IOException, NoSuchAlgorithmException {
-
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-
-        try (InputStream inputStream = Files.newInputStream(file)) {
-
-            byte[] buffer = new byte[8192];
-            int bytesRead;
-
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                digest.update(buffer, 0, bytesRead);
-            }
-        }
-
-        return HexFormat.of().formatHex(digest.digest());
     }
 
     private boolean isDuplicateFile(Path file) throws IOException {

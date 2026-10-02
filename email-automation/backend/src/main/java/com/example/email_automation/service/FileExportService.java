@@ -49,8 +49,6 @@ public class FileExportService {
 
     private boolean saveTextFile(EmailMessage content, String format) {
 
-        boolean isSaved = false;
-
         try {
             // Create a safe filename based on the email subject
             String filenameString = createSafeFilename(content.getSubject())
@@ -67,20 +65,10 @@ public class FileExportService {
             try (BufferedWriter writer = Files.newBufferedWriter(pathFilename)) {
                 writer.write(header);
                 writer.write(content.getBody());
-                isSaved = true;
             }
 
-            if (isSaved) {
-
-                logger.info("Created {}.", pathFilename.getFileName());
-                return true;
-
-            } else {
-
-                logger.error("Failed to create {}.", pathFilename.getFileName());
-                return false;
-
-            }
+            logger.info("Created {}.", pathFilename.getFileName());
+            return true;
 
         } catch (IOException e) {
             logger.error("IOException occurred while saving text file: {}", e);
@@ -90,9 +78,7 @@ public class FileExportService {
     }
 
     private boolean saveWordFile(EmailMessage content, String format) {
-        
-        boolean isSaved = false;
-            
+                   
         // Create and format the DOCX file
 
         // Create a safe filename based on the email subject
@@ -116,25 +102,15 @@ public class FileExportService {
                 // Save the document
                 document.write(out);
                 logger.info("Email saved successfully to {}.", pathFilename);
-                isSaved = true;
             }
 
-            if (isSaved) {
+            logger.info("Created {}.", pathFilename.getFileName());
+            return true;
 
-                logger.info("Created {}.", pathFilename.getFileName());
-                return true;                
-
-            } else {
-
-                logger.error("Failed to create {}.", pathFilename.getFileName());
-                return false;
-
-            }
         } catch (IOException e) {
             logger.error("IOException occurred while saving Word file: {}", e);
             throw new RuntimeException("IOException occurred while saving Word file: " + e.getMessage(), e);
         }
-
     }
   
     private void addWordBody(XWPFDocument document, EmailMessage content) {

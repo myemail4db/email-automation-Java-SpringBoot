@@ -1,16 +1,13 @@
 package com.example.email_automation.service;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import com.example.email_automation.service.ZipExportService;
 
 class ZipExportServiceTest {
 

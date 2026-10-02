@@ -5,12 +5,14 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -91,7 +93,7 @@ public class EmailExportServiceTest {
     }
 
     @Test
-    public void exportEmails_withTextFormat_emailsPresent_returnsExportSummary() {
+    void exportEmails_withTextFormat_emailsPresent_returnsExportSummary() throws Exception {
         // Purpose: Verify export returns a summary when emails are present. 
         // This is the happy path test for the export workflow.
 
@@ -124,9 +126,68 @@ public class EmailExportServiceTest {
         WorkflowReport result = emailExportService.exportEmails(format);
 
         // Assert
+        assertEquals(1, result.getEmailsFound());
+        assertEquals(1, result.getFilesSaved());
+        assertEquals(0, result.getFilesFailed());
+        assertTrue(result.isWorkflowCompleted());
+
         assertEquals(
                 "Export completed successfully.",
                 result.getStatusMessage()
         );
+
+        verify(gmailService).moveEmailToLabel(message, true);
+    }
+
+    @Test
+    void exportEmails_whenFileSaveFails_returnsFailureSummary() throws Exception {
+
+        // Purpose: Verify a file export failure is reported correctly
+        // and the Gmail message is moved to the failure label.
+
+        // Arrange
+        String format = "Text";
+
+        Message message = new Message();
+        message.setId("test-message-id");
+
+        EmailMessage emailMessage = new EmailMessage(
+                "test-message-id",
+                "Test Subject",
+                "sender@gmail.com",
+                "This is the full email body.",
+                "2024-06-01"
+        );
+
+        List<Message> emailList = new ArrayList<>();
+        emailList.add(message);
+
+        when(gmailService.getRecentEmails()).thenReturn(emailList);
+        when(emailBodyExtractorService.extractEmailMessage(message))
+                .thenReturn(emailMessage);
+        when(textFilterService.clean(emailMessage.getBody()))
+                .thenReturn(emailMessage.getBody());
+
+        when(fileExportService.saveFile(
+                any(EmailMessage.class),
+                eq(format)
+        )).thenReturn(false);
+
+        // Act
+        WorkflowReport result =
+                emailExportService.exportEmails(format);
+
+        // Assert
+        assertEquals(1, result.getEmailsFound());
+        assertEquals(0, result.getFilesSaved());
+        assertEquals(1, result.getFilesFailed());
+        assertEquals(false, result.isWorkflowCompleted());
+
+        assertEquals(
+                "Export completed with 1 file(s) failed.",
+                result.getStatusMessage()
+        );
+
+        verify(gmailService).moveEmailToLabel(message, false);
     }
 }
