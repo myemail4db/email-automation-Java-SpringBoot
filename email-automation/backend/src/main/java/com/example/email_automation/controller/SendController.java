@@ -17,7 +17,7 @@ public class SendController {
     }
 
     @GetMapping("/api/send")
-    public String sendEmails(@RequestParam(required = false, defaultValue = "text") String format) {
+    public String sendEmails(@RequestParam String format) {
 
         WorkflowReport result = emailSendService.processSend(format);
 

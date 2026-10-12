@@ -4,11 +4,15 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import com.example.email_automation.util.GmailFilenameUtil;
 
 @Service
 public class ArchiveService {
@@ -64,6 +68,10 @@ public class ArchiveService {
                         continue;
                     }
 
+                    if (GmailFilenameUtil.extractGmailId(file) == null) {
+                        continue;
+                    }
+
                     Path destination = Path.of(archiveDirectory)
                             .resolve(file.getFileName());
 
@@ -81,33 +89,9 @@ public class ArchiveService {
         }
     }
 
-    private String extractGmailId(Path file) {
-
-        String fileName = file.getFileName().toString();
-
-        int gmailIndex = fileName.indexOf("_GMAIL-");
-
-        if (gmailIndex == -1) {
-            return null;
-        }
-
-        int idStart = gmailIndex + "_GMAIL-".length();
-        int idEnd = fileName.indexOf('_', idStart);
-
-        if (idEnd == -1) {
-            idEnd = fileName.lastIndexOf('.');
-        }
-
-        if (idEnd == -1 || idEnd <= idStart) {
-            return null;
-        }
-
-        return fileName.substring(idStart, idEnd);
-    }
-
     private boolean isDuplicateFile(Path file) throws IOException {
 
-        String gmailId = extractGmailId(file);
+        String gmailId = GmailFilenameUtil.extractGmailId(file);
 
         if (gmailId == null) {
             return false;
@@ -119,8 +103,7 @@ public class ArchiveService {
             return false;
         }
 
-        try (DirectoryStream<Path> stream =
-                Files.newDirectoryStream(archivePath)) {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(archivePath)) {
 
             for (Path archivedFile : stream) {
 
@@ -128,7 +111,7 @@ public class ArchiveService {
                     continue;
                 }
 
-                String archivedGmailId = extractGmailId(archivedFile);
+                String archivedGmailId = GmailFilenameUtil.extractGmailId(archivedFile);
 
                 if (gmailId.equals(archivedGmailId)) {
                     return true;
@@ -167,8 +150,7 @@ public class ArchiveService {
         while (Files.exists(destination)) {
 
             destination = duplicatePath.resolve(
-                    baseName + "_" + duplicateNumber + extension
-            );
+                    baseName + "_" + duplicateNumber + extension);
 
             duplicateNumber++;
         }
@@ -177,8 +159,7 @@ public class ArchiveService {
 
         logger.info(
                 "Duplicate file moved to duplicate directory. File={}",
-                destination.getFileName()
-        );
+                destination.getFileName());
     }
 
     public int archiveDuplicateFiles(String format) {
@@ -229,6 +210,51 @@ public class ArchiveService {
         } catch (IOException e) {
             logger.error("Failed while checking processed files for duplicates.", e);
             return -1;
+        }
+    }
+
+    public List<String> getProcessedFileGmailIds(String format) {
+
+        List<String> gmailIds = new ArrayList<>();
+
+        String extension;
+
+        if ("text".equalsIgnoreCase(format)) {
+            extension = ".txt";
+        } else if ("word".equalsIgnoreCase(format)) {
+            extension = ".docx";
+        } else {
+            return gmailIds;
+        }
+
+        try {
+            Path processedPath = Path.of(processedDirectory);
+
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(processedPath)) {
+
+                for (Path file : stream) {
+
+                    if (!Files.isRegularFile(file)) {
+                        continue;
+                    }
+
+                    if (!file.getFileName().toString().toLowerCase().endsWith(extension)) {
+                        continue;
+                    }
+
+                    String gmailId = GmailFilenameUtil.extractGmailId(file);
+
+                    if (gmailId != null && !gmailId.isEmpty() && !gmailIds.contains(gmailId)) {
+                        gmailIds.add(gmailId);
+                    }
+                }
+            }
+
+            return gmailIds;
+
+        } catch (IOException e) {
+            logger.error("Failed to gather processed Gmail IDs.", e);
+            throw new IllegalStateException("Failed to gather processed Gmail IDs.", e);
         }
     }
 }

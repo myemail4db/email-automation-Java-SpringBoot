@@ -16,11 +16,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.example.email_automation.util.GmailFilenameUtil;
+
 @Service
 public class ZipExportService {
-    
-    private static final Logger logger = 
-        LoggerFactory.getLogger(ZipExportService.class);
+
+    private static final Logger logger = LoggerFactory.getLogger(ZipExportService.class);
 
     @Value("${email.files.processed-dir}")
     private String emailFilesProcessedDir;
@@ -37,14 +38,14 @@ public class ZipExportService {
     public Path createZipEmail(String format) {
 
         String extension;
-        
+
         if (format.equals("text")) {
             extension = ".txt";
-        } else if(format.equals("word")) {
+        } else if (format.equals("word")) {
             extension = ".docx";
         } else {
             return null;
-        } 
+        }
 
         try {
 
@@ -53,7 +54,7 @@ public class ZipExportService {
 
             // create the zip filename with path
             Path zipFile = createZipPath(Path.of(zipFilesZipDir), format);
-            
+
             boolean zipCreated = addFiles(zipFile, extension);
 
             if (zipCreated) {
@@ -79,7 +80,7 @@ public class ZipExportService {
         String timestamp = formatReceivedDateForFilename();
         String zipFileName = zipFilesZipPrefix + "_" + format + "_" + timestamp + ".zip";
         Path zipFilePath = sourceDirectory.resolve(zipFileName);
-        
+
         // if zip file already exists, add a _number suffix to avoid overwriting
         int counter = 1;
         while (Files.exists(zipFilePath)) {
@@ -99,36 +100,40 @@ public class ZipExportService {
 
             // Create the ZIP output stream to write to the zip file
             try (OutputStream os = Files.newOutputStream(zipFile, StandardOpenOption.CREATE);
-                 ZipOutputStream zos = new ZipOutputStream(os);) {
-                
+                    ZipOutputStream zos = new ZipOutputStream(os);) {
+
                 int filesAdded = 0;
 
                 for (Path file : stream) {
-                    
+
                     if (!Files.isRegularFile(file)) {
                         continue;
                     }
-                    
+
                     if (!file.getFileName().toString().toLowerCase().endsWith(extension)) {
                         continue;
                     }
-                    
+
+                    if (GmailFilenameUtil.extractGmailId(file) == null) {
+                        continue;
+                    }
+
                     // Create a new entry inside the ZIP archive
                     ZipEntry zipEntry = new ZipEntry(file.getFileName().toString());
 
                     // Add the file into the zip file
                     zos.putNextEntry(zipEntry);
-                    
+
                     // Copy file content to the ZIP stream
                     Files.copy(file, zos);
-                    
+
                     logger.info("files selected to be zipped: {}", file);
-                    //logger.info("ZIP export completed: {}", file);
-                    
+                    // logger.info("ZIP export completed: {}", file);
+
                     // Close the current entry
                     zos.closeEntry();
                     filesAdded++;
-                    
+
                 }
 
                 return filesAdded > 0;
@@ -158,11 +163,12 @@ public class ZipExportService {
         try {
 
             LocalDateTime receivedDate = LocalDateTime.now();
-           
+
             // Output formatter (defines how you want the string to look)
             DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
-                       
-            // LocalDateTime localDateTime = LocalDateTime.parse(receivedDate, inputFormatter);
+
+            // LocalDateTime localDateTime = LocalDateTime.parse(receivedDate,
+            // inputFormatter);
             // Outputs: 20230802_150405
             String result = receivedDate.format(outputFormatter);
 
@@ -174,7 +180,7 @@ public class ZipExportService {
         }
 
     }
- 
+
     public void archiveZipFile(Path zipFile) throws IOException {
 
         Path zipArchivePath = Path.of(zipArchiveDirectory);
@@ -182,15 +188,13 @@ public class ZipExportService {
         Files.createDirectories(zipArchivePath);
 
         Path destination = zipArchivePath.resolve(
-                zipFile.getFileName()
-        );
+                zipFile.getFileName());
 
         Files.move(zipFile, destination);
 
         logger.info(
                 "ZIP file archived successfully. File={}",
-                destination.getFileName()
-        );
+                destination.getFileName());
     }
 
     public void deleteZipFile(Path zipFile) throws IOException {
@@ -199,7 +203,6 @@ public class ZipExportService {
 
         logger.info(
                 "ZIP file deleted after unsuccessful send. File={}",
-                zipFile.getFileName()
-        );
+                zipFile.getFileName());
     }
 }

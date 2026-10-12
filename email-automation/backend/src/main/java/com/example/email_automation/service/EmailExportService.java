@@ -40,7 +40,7 @@ public class EmailExportService {
     }
 
     // Main workflow
-    public WorkflowReport exportEmails(String format) {
+    public WorkflowReport processExport(String format) {
 
         // Initialize a workflow report to track the export process
         WorkflowReport workflowReport = new WorkflowReport();

@@ -32,8 +32,7 @@ import jakarta.mail.internet.MimeMultipart;
 @Service
 public class GmailService {
 
-    private static final Logger logger = 
-        LoggerFactory.getLogger(GmailService.class);
+    private static final Logger logger = LoggerFactory.getLogger(GmailService.class);
 
     private final GmailAuthService authService;
 
@@ -48,6 +47,9 @@ public class GmailService {
 
     @Value("${email.gmail.recipient}")
     private String emailGmailRecipient;
+
+    @Value("${email.gmail.send-success-label}")
+    private String emailGmailSendSuccessLabel;
 
     public GmailService(GmailAuthService authService) {
         this.authService = authService;
@@ -147,8 +149,7 @@ public class GmailService {
             }
         }
         throw new IllegalArgumentException(
-                "Gmail label not found: " + labelName
-        );
+                "Gmail label not found: " + labelName);
     }
 
     public boolean sendZipFile(Path zipFile) {
@@ -167,20 +168,17 @@ public class GmailService {
 
             emailMessage.setRecipient(
                     jakarta.mail.Message.RecipientType.TO,
-                    new InternetAddress(emailGmailRecipient)
-            );
+                    new InternetAddress(emailGmailRecipient));
 
             emailMessage.setSubject(
-                    "Job Batch - " + zipFile.getFileName().toString()
-            );
+                    "Job Batch - " + zipFile.getFileName().toString());
 
             MimeMultipart multipart = new MimeMultipart();
 
             MimeBodyPart textPart = new MimeBodyPart();
 
             textPart.setText(
-                    "Please find the reviewed job batch attached.\n\nRegards"
-            );
+                    "Please find the reviewed job batch attached.\n\nRegards");
 
             multipart.addBodyPart(textPart);
 
@@ -197,8 +195,8 @@ public class GmailService {
             emailMessage.writeTo(buffer);
 
             String encodedEmail = Base64.getUrlEncoder()
-                .withoutPadding()
-                .encodeToString(buffer.toByteArray());
+                    .withoutPadding()
+                    .encodeToString(buffer.toByteArray());
 
             Message gmailMessage = new Message();
             gmailMessage.setRaw(encodedEmail);
@@ -218,5 +216,24 @@ public class GmailService {
             logger.error("Failed to send ZIP file through Gmail.", e);
             return false;
         }
+    }
+
+    public void moveEmailToSentLabel(String gmailId) throws Exception {
+
+        Gmail service = authService.getGmailClient();
+
+        String addLabelId;
+        String removeLabelId;
+
+        addLabelId = getLabelId(service, emailGmailSendSuccessLabel);
+        removeLabelId = getLabelId(service, emailGmailSuccessLabel);
+
+        ModifyMessageRequest mods = new ModifyMessageRequest()
+                .setAddLabelIds(Collections.singletonList(addLabelId))
+                .setRemoveLabelIds(Collections.singletonList(removeLabelId));
+
+        service.users().messages()
+                .modify("me", gmailId, mods)
+                .execute();
     }
 }

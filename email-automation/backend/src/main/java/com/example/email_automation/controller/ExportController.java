@@ -21,13 +21,13 @@ public class ExportController {
     }
     
     @GetMapping("/api/export")
-    public String exportEmails(@RequestParam(required = false) String format) {
+    public String processExport(@RequestParam(required = false) String format) {
 
         if (format == null || format.isEmpty()) {
             format = defaultFormat;
         }
 
-        WorkflowReport workflowReport = emailExportService.exportEmails(format);
+        WorkflowReport workflowReport = emailExportService.processExport(format);
 
         return workflowReport.getStatusMessage();
     }

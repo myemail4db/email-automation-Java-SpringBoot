@@ -39,9 +39,9 @@ public class EmailExportServiceTest {
     private EmailExportService emailExportService;
 
     @Test
-    public void exportEmails_withNullFormat_returnsErrorMessage() {
+    public void processExport_withNullFormat_returnsErrorMessage() {
         // Act
-        WorkflowReport result = emailExportService.exportEmails(null);
+        WorkflowReport result = emailExportService.processExport(null);
 
         // Assert
         assertEquals(
@@ -51,7 +51,7 @@ public class EmailExportServiceTest {
     }
 
     @Test
-    public void exportEmails_withTextFormat_emailsEmpty_returnsNoEmailsMessage() {
+    public void processExport_withTextFormat_emailsEmpty_returnsNoEmailsMessage() {
 
         // Purpose: Verify export exits cleanly when no emails are available
 
@@ -61,7 +61,7 @@ public class EmailExportServiceTest {
         when(gmailService.getRecentEmails()).thenReturn(Collections.emptyList());
 
         // Act
-        WorkflowReport result = emailExportService.exportEmails(format);
+        WorkflowReport result = emailExportService.processExport(format);
 
         // Assert
         assertEquals(
@@ -71,7 +71,7 @@ public class EmailExportServiceTest {
     }
     
     @Test
-    public void exportEmails_withTextFormat_emailsNull_returnNoEmailsMessage() {
+    public void processExport_withTextFormat_emailsNull_returnNoEmailsMessage() {
 
         // Purpose: Defensive test
         // Verify export returns a safe message when Gmail returns a list containing a null email.    
@@ -82,7 +82,7 @@ public class EmailExportServiceTest {
         when(gmailService.getRecentEmails()).thenReturn(Collections.singletonList(null));
 
         // Act
-        WorkflowReport result = emailExportService.exportEmails(format);
+        WorkflowReport result = emailExportService.processExport(format);
 
         // Assert
         assertEquals(
@@ -93,7 +93,7 @@ public class EmailExportServiceTest {
     }
 
     @Test
-    void exportEmails_withTextFormat_emailsPresent_returnsExportSummary() throws Exception {
+    void processExport_withTextFormat_emailsPresent_returnsExportSummary() throws Exception {
         // Purpose: Verify export returns a summary when emails are present. 
         // This is the happy path test for the export workflow.
 
@@ -123,7 +123,7 @@ public class EmailExportServiceTest {
         when(fileExportService.saveFile(any(EmailMessage.class), eq(format))).thenReturn(true);
 
         // Act
-        WorkflowReport result = emailExportService.exportEmails(format);
+        WorkflowReport result = emailExportService.processExport(format);
 
         // Assert
         assertEquals(1, result.getEmailsFound());
@@ -140,7 +140,7 @@ public class EmailExportServiceTest {
     }
 
     @Test
-    void exportEmails_whenFileSaveFails_returnsFailureSummary() throws Exception {
+    void processExport_whenFileSaveFails_returnsFailureSummary() throws Exception {
 
         // Purpose: Verify a file export failure is reported correctly
         // and the Gmail message is moved to the failure label.
@@ -175,7 +175,7 @@ public class EmailExportServiceTest {
 
         // Act
         WorkflowReport result =
-                emailExportService.exportEmails(format);
+                emailExportService.processExport(format);
 
         // Assert
         assertEquals(1, result.getEmailsFound());

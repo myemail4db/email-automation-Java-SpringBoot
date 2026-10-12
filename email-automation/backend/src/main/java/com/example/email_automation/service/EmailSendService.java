@@ -2,6 +2,7 @@ package com.example.email_automation.service;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +13,7 @@ import com.example.email_automation.model.WorkflowReport;
 @Service
 public class EmailSendService {
 
-    private static final Logger logger = 
-        LoggerFactory.getLogger(EmailSendService.class);
+    private static final Logger logger = LoggerFactory.getLogger(EmailSendService.class);
 
     private final GmailService gmailService;
     private final ZipExportService zipExportService;
@@ -59,6 +59,19 @@ public class EmailSendService {
 
         result.setDuplicateFilesArchived(duplicatesArchived);
 
+        List<String> gmailIds;
+
+        try {
+            gmailIds = archiveService.getProcessedFileGmailIds(format);
+        } catch (IllegalStateException e) {
+            logger.error("Send workflow stopped: failed to gather Gmail IDs.", e);
+
+            result.setStatusMessage("Failed to gather Gmail IDs. No email was sent.");
+            completeWorkflowReport(result);
+
+            return result;
+        }
+
         Path zipFile = createZipForSend(format);
 
         if (zipFile == null) {
@@ -66,13 +79,11 @@ public class EmailSendService {
             if (duplicatesArchived > 0) {
                 logger.info(
                         "Send workflow completed with no new files to send. Duplicate files moved={}",
-                        duplicatesArchived
-                );
+                        duplicatesArchived);
 
                 result.setWorkflowCompleted(true);
                 result.setStatusMessage(
-                        "No new files to send. Duplicate files moved: " + duplicatesArchived
-                );
+                        "No new files to send. Duplicate files moved: " + duplicatesArchived);
 
                 completeWorkflowReport(result);
 
@@ -93,25 +104,35 @@ public class EmailSendService {
         boolean isSent = gmailService.sendZipFile(zipFile);
 
         if (!isSent) {
-        logger.error("Send workflow stopped: Gmail send failed.");
+            logger.error("Send workflow stopped: Gmail send failed.");
 
-        try {
-            zipExportService.deleteZipFile(zipFile);
-        } catch (java.io.IOException e) {
-            logger.error(
-                    "Gmail send failed and temporary ZIP cleanup also failed.",
-                    e
-            );
+            try {
+                zipExportService.deleteZipFile(zipFile);
+            } catch (java.io.IOException e) {
+                logger.error(
+                        "Gmail send failed and temporary ZIP cleanup also failed.",
+                        e);
+            }
+
+            result.setStatusMessage("ZIP file was created, but the email was not sent.");
+            completeWorkflowReport(result);
+
+            return result;
         }
-
-        result.setStatusMessage("ZIP file was created, but the email was not sent.");
-        completeWorkflowReport(result);
-
-        return result;
-    }
 
         result.setEmailSent(true);
         logger.info("Gmail send completed successfully.");
+
+        boolean labelUpdateFailed = false;
+
+        for (String gmailId : gmailIds) {
+            try {
+                gmailService.moveEmailToSentLabel(gmailId);
+            } catch (Exception e) {
+                logger.error("Failed to move Gmail message ID={} to processed_sent.", gmailId, e);
+                labelUpdateFailed = true;
+            }
+        }
 
         int filesArchived = archiveService.archiveFiles(format);
 
@@ -144,8 +165,7 @@ public class EmailSendService {
             logger.error("Email was sent successfully, but ZIP archiving failed.", e);
 
             result.setStatusMessage(
-                    "Email was sent successfully, but ZIP archiving failed."
-            );
+                    "Email was sent successfully, but ZIP archiving failed.");
 
             completeWorkflowReport(result);
 
@@ -153,16 +173,20 @@ public class EmailSendService {
         }
 
         result.setWorkflowCompleted(true);
-        
+
         if (duplicatesArchived > 0) {
             result.setStatusMessage(
                     "Email sent successfully and files archived. Duplicate files skipped: "
-                            + duplicatesArchived
-            );
+                            + duplicatesArchived);
         } else {
             result.setStatusMessage(
-                    "Email sent successfully and files archived."
-            );
+                    "Email sent successfully and files archived.");
+        }
+
+        if (labelUpdateFailed) {
+            result.setWorkflowCompleted(false);
+            result.setStatusMessage(
+                    "Email sent successfully, but one or more Gmail label updates failed.");
         }
 
         completeWorkflowReport(result);
@@ -177,8 +201,6 @@ public class EmailSendService {
         workflowReport.setDuration(
                 (int) java.time.Duration.between(
                         workflowReport.getStartTime(),
-                        workflowReport.getEndTime()
-                ).toSeconds()
-        );
+                        workflowReport.getEndTime()).toSeconds());
     }
 }

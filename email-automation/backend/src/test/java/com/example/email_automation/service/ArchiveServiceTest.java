@@ -16,10 +16,6 @@ class ArchiveServiceTest {
     Path tempDirectory;
 
     @Test
-    void archiveServiceTestSetup() {
-    }
-
-    @Test
     void shouldDetectDuplicateWhenGmailIdsMatch() throws Exception {
 
         Path processedDirectory = tempDirectory.resolve("processed_review");
@@ -32,48 +28,39 @@ class ArchiveServiceTest {
 
         Files.writeString(
                 processedDirectory.resolve("New Job_GMAIL-ABC123.txt"),
-                "new file content"
-        );
+                "new file content");
 
         Files.writeString(
                 archiveDirectory.resolve("Old Job_GMAIL-ABC123.txt"),
-                "completely different archived content"
-        );
+                "completely different archived content");
 
         ArchiveService archiveService = new ArchiveService();
 
         ReflectionTestUtils.setField(
                 archiveService,
                 "processedDirectory",
-                processedDirectory.toString()
-        );
+                processedDirectory.toString());
 
         ReflectionTestUtils.setField(
                 archiveService,
                 "archiveDirectory",
-                archiveDirectory.toString()
-        );
+                archiveDirectory.toString());
 
         ReflectionTestUtils.setField(
                 archiveService,
                 "duplicateDirectory",
-                duplicateDirectory.toString()
-        );
+                duplicateDirectory.toString());
 
         int duplicates = archiveService.archiveDuplicateFiles("text");
 
         assertEquals(1, duplicates);
         assertTrue(
                 Files.exists(
-                        duplicateDirectory.resolve("New Job_GMAIL-ABC123.txt")
-                )
-        );
+                        duplicateDirectory.resolve("New Job_GMAIL-ABC123.txt")));
 
         assertFalse(
                 Files.exists(
-                        processedDirectory.resolve("New Job_GMAIL-ABC123.txt")
-                )
-        );
+                        processedDirectory.resolve("New Job_GMAIL-ABC123.txt")));
     }
 
     @Test
@@ -89,38 +76,32 @@ class ArchiveServiceTest {
 
         Files.writeString(
                 processedDirectory.resolve("Job_GMAIL-ABC123.txt"),
-                "new duplicate content"
-        );
+                "new duplicate content");
 
         Files.writeString(
                 archiveDirectory.resolve("Original Job_GMAIL-ABC123.txt"),
-                "previously sent content"
-        );
+                "previously sent content");
 
         Files.writeString(
                 duplicateDirectory.resolve("Job_GMAIL-ABC123.txt"),
-                "previous duplicate content"
-        );
+                "previous duplicate content");
 
         ArchiveService archiveService = new ArchiveService();
 
         ReflectionTestUtils.setField(
                 archiveService,
                 "processedDirectory",
-                processedDirectory.toString()
-        );
+                processedDirectory.toString());
 
         ReflectionTestUtils.setField(
                 archiveService,
                 "archiveDirectory",
-                archiveDirectory.toString()
-        );
+                archiveDirectory.toString());
 
         ReflectionTestUtils.setField(
                 archiveService,
                 "duplicateDirectory",
-                duplicateDirectory.toString()
-        );
+                duplicateDirectory.toString());
 
         int duplicates = archiveService.archiveDuplicateFiles("text");
 
@@ -128,9 +109,7 @@ class ArchiveServiceTest {
 
         assertTrue(
                 Files.exists(
-                        duplicateDirectory.resolve("Job_GMAIL-ABC123_2.txt")
-                )
-        );
+                        duplicateDirectory.resolve("Job_GMAIL-ABC123_2.txt")));
     }
 
     @Test
@@ -146,33 +125,28 @@ class ArchiveServiceTest {
 
         Files.writeString(
                 processedDirectory.resolve("New Job_GMAIL-ABC123.txt"),
-                "identical content"
-        );
+                "identical content");
 
         Files.writeString(
                 archiveDirectory.resolve("Old Job_GMAIL-XYZ789.txt"),
-                "identical content"
-        );
+                "identical content");
 
         ArchiveService archiveService = new ArchiveService();
 
         ReflectionTestUtils.setField(
                 archiveService,
                 "processedDirectory",
-                processedDirectory.toString()
-        );
+                processedDirectory.toString());
 
         ReflectionTestUtils.setField(
                 archiveService,
                 "archiveDirectory",
-                archiveDirectory.toString()
-        );
+                archiveDirectory.toString());
 
         ReflectionTestUtils.setField(
                 archiveService,
                 "duplicateDirectory",
-                duplicateDirectory.toString()
-        );
+                duplicateDirectory.toString());
 
         int duplicates = archiveService.archiveDuplicateFiles("text");
 
@@ -180,14 +154,48 @@ class ArchiveServiceTest {
 
         assertTrue(
                 Files.exists(
-                        processedDirectory.resolve("New Job_GMAIL-ABC123.txt")
-                )
-        );
+                        processedDirectory.resolve("New Job_GMAIL-ABC123.txt")));
 
         assertFalse(
                 Files.exists(
-                        duplicateDirectory.resolve("New Job_GMAIL-ABC123.txt")
-                )
-        );
+                        duplicateDirectory.resolve("New Job_GMAIL-ABC123.txt")));
+    }
+
+    @Test
+    void shouldArchiveOnlyFilesWithGmailId() throws Exception {
+
+        Path processedDirectory = tempDirectory.resolve("processed_review");
+        Path archiveDirectory = tempDirectory.resolve("sent_archive_email");
+
+        Files.createDirectories(processedDirectory);
+        Files.createDirectories(archiveDirectory);
+
+        Path validFile = processedDirectory.resolve("Software_Engineer_GMAIL-abc123.txt");
+        Path invalidFile = processedDirectory.resolve("Manual_Notes.txt");
+
+        Files.writeString(validFile, "Software Engineer job posting");
+        Files.writeString(invalidFile, "Manual notes for review");
+
+        ArchiveService archiveService = new ArchiveService();
+
+        ReflectionTestUtils.setField(
+                archiveService,
+                "processedDirectory",
+                processedDirectory.toString());
+
+        ReflectionTestUtils.setField(
+                archiveService,
+                "archiveDirectory",
+                archiveDirectory.toString());
+
+        int filesArchived = archiveService.archiveFiles("text");
+
+        assertEquals(1, filesArchived);
+
+        assertTrue(
+                Files.exists(archiveDirectory.resolve("Software_Engineer_GMAIL-abc123.txt")));
+
+        assertTrue(
+                Files.exists(processedDirectory.resolve("Manual_Notes.txt")));
     }
 }
