@@ -111,24 +111,24 @@ public class GmailService {
         }
     }
 
-    public void moveEmailToLabel(Message message, boolean isSuccess) throws Exception {
+    public void updateEmailLabels(Message message, boolean isSuccess) throws Exception {
 
         Gmail service = authService.getGmailClient();
 
-        String addLabelId;
-        String removeLabelId;
+        List<String> addLabelIds = new ArrayList<>();
+        List<String> removeLabelIds = new ArrayList<>();
 
         if (isSuccess) {
-            addLabelId = getLabelId(service, emailGmailSuccessLabel);
-            removeLabelId = getLabelId(service, emailGmailSourceLabel);
+            addLabelIds.add(getLabelId(service, emailGmailSuccessLabel));
+            removeLabelIds.add(getLabelId(service, emailGmailSourceLabel));
+            removeLabelIds.add(getLabelId(service, emailGmailFailLabel));
         } else {
-            addLabelId = getLabelId(service, emailGmailFailLabel);
-            removeLabelId = getLabelId(service, emailGmailSourceLabel);
+            addLabelIds.add(getLabelId(service, emailGmailFailLabel));
         }
 
         ModifyMessageRequest mods = new ModifyMessageRequest()
-                .setAddLabelIds(Collections.singletonList(addLabelId))
-                .setRemoveLabelIds(Collections.singletonList(removeLabelId));
+                .setAddLabelIds(addLabelIds)
+                .setRemoveLabelIds(removeLabelIds);
 
         service.users().messages()
                 .modify("me", message.getId(), mods)

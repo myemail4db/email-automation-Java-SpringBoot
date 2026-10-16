@@ -1,9 +1,10 @@
 package com.example.email_automation.controller;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import com.example.email_automation.model.WorkflowReport;
 import com.example.email_automation.service.EmailExportService;
@@ -13,18 +14,18 @@ public class ExportController {
 
     private final EmailExportService emailExportService;
 
-    @Value("${email.export.default-format}")
-    private String defaultFormat;
-
     public ExportController(EmailExportService emailExportService) {
         this.emailExportService = emailExportService;
     }
-    
-    @GetMapping("/api/export")
-    public String processExport(@RequestParam(required = false) String format) {
 
-        if (format == null || format.isEmpty()) {
-            format = defaultFormat;
+    @GetMapping("/api/export")
+    public String processExport(@RequestParam String format) {
+
+        if (!format.equalsIgnoreCase("text")
+                && !format.equalsIgnoreCase("word")) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid format. Use text or word.");
         }
 
         WorkflowReport workflowReport = emailExportService.processExport(format);

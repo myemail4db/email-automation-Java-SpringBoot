@@ -166,9 +166,9 @@ class EmailSendServiceTest {
         assertFalse(result.isWorkflowCompleted());
 
         assertEquals(
-            "Email was sent successfully, but ZIP archiving failed.",
-            result.getStatusMessage());
-}
+                "Email was sent successfully, but ZIP archiving failed.",
+                result.getStatusMessage());
+    }
 
     @Test
     void shouldSendNewFilesWhenDuplicatesAreFound() throws Exception {
@@ -271,26 +271,22 @@ class EmailSendServiceTest {
         EmailSendService emailSendService = new EmailSendService(
                 zipExportService,
                 gmailService,
-                archiveService
-        );
-
-        Path zipFile = Path.of("ready_to_send/job_batch_test.zip");
+                archiveService);
 
         when(archiveService.archiveDuplicateFiles("text")).thenReturn(0);
 
         when(archiveService.getProcessedFileGmailIds("text"))
-            .thenThrow(new IllegalStateException("Directory read failed"));
+                .thenThrow(new IllegalStateException("Directory read failed"));
 
         WorkflowReport result = emailSendService.processSend("text");
 
         assertFalse(result.isWorkflowCompleted());
         assertFalse(result.isEmailSent());
         assertEquals(
-            "Failed to gather Gmail IDs. No email was sent.",
-            result.getStatusMessage()
-        );        
+                "Failed to gather Gmail IDs. No email was sent.",
+                result.getStatusMessage());
 
         verify(zipExportService, never()).createZipEmail(anyString());
-        verify(gmailService, never()).sendZipFile(any());        
+        verify(gmailService, never()).sendZipFile(any());
     }
 }

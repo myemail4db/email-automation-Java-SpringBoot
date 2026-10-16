@@ -17,8 +17,7 @@ import com.google.api.services.gmail.model.Message;
 @Service
 public class EmailExportService {
 
-    private static final Logger logger = 
-        LoggerFactory.getLogger(EmailExportService.class);
+    private static final Logger logger = LoggerFactory.getLogger(EmailExportService.class);
 
     // Dependencies
     private final GmailService gmailService;
@@ -31,7 +30,7 @@ public class EmailExportService {
             GmailService gmailService,
             TextFilterService textFilterService,
             EmailBodyExtractorService emailBodyExtractorService,
-            FileExportService fileExportService ) {
+            FileExportService fileExportService) {
 
         this.gmailService = gmailService;
         this.textFilterService = textFilterService;
@@ -45,7 +44,7 @@ public class EmailExportService {
         // Initialize a workflow report to track the export process
         WorkflowReport workflowReport = new WorkflowReport();
         workflowReport.setStartTime(LocalDateTime.now());
-        
+
         logger.info("Export workflow started. Format={}", format);
 
         if (format == null) {
@@ -73,6 +72,10 @@ public class EmailExportService {
 
         try {
             emails = gmailService.getRecentEmails();
+
+            if (emails == null) {
+                throw new IllegalStateException("Gmail returned a null email list.");
+            }
         } catch (Exception e) {
             logger.error("Unable to retrieve emails from Gmail.", e);
 
@@ -100,6 +103,7 @@ public class EmailExportService {
         // Initialize counters for saved and failed files
         int filesSaved = 0;
         int filesFailed = 0;
+        boolean labelUpdateFailed = false;
 
         logger.info("Beginning processing of {} email(s).", emails.size());
 
@@ -126,16 +130,16 @@ public class EmailExportService {
                 }
 
                 try {
-                    gmailService.moveEmailToLabel(message, isSaved);
+                    gmailService.updateEmailLabels(message, isSaved);
 
                     logger.info(
                             "Gmail label updated for email {} of {}.",
                             emailNumber,
-                            emails.size()
-                    );
+                            emails.size());
 
                 } catch (Exception e) {
                     logger.error("Error occurred while moving email to label.", e);
+                    labelUpdateFailed = true;
                 }
 
             } catch (Exception e) {
@@ -143,9 +147,10 @@ public class EmailExportService {
                 logger.error("Error occurred while processing email.", e);
 
                 try {
-                    gmailService.moveEmailToLabel(message, false);
+                    gmailService.updateEmailLabels(message, false);
                 } catch (Exception labelException) {
                     logger.error("Error occurred while moving failed email to label.", labelException);
+                    labelUpdateFailed = true;
                 }
             }
         }
@@ -153,7 +158,7 @@ public class EmailExportService {
         // Reporting
         workflowReport.setFilesSaved(filesSaved);
         workflowReport.setFilesFailed(filesFailed);
-        workflowReport.setWorkflowCompleted(filesFailed == 0);
+        workflowReport.setWorkflowCompleted(filesFailed == 0 && !labelUpdateFailed);
 
         // Reporting - end time and duration
         completeWorkflowReport(workflowReport);
@@ -163,16 +168,17 @@ public class EmailExportService {
                 workflowReport.getEmailsFound(),
                 workflowReport.getFilesSaved(),
                 workflowReport.getFilesFailed(),
-                workflowReport.getDuration()
-        );
+                workflowReport.getDuration());
 
         // Reporting - create the summary report to the browser and console
-        if (filesFailed == 0) {
+        if (filesFailed == 0 && !labelUpdateFailed) {
             workflowReport.setStatusMessage("Export completed successfully.");
+        } else if (filesFailed > 0 && !labelUpdateFailed) {
+            workflowReport.setStatusMessage("Export completed with file failures.");
+        } else if (filesFailed == 0 && labelUpdateFailed) {
+            workflowReport.setStatusMessage("Gmail label updates failed.");
         } else {
-            workflowReport.setStatusMessage(
-                    "Export completed with " + filesFailed + " file(s) failed."
-            );
+            workflowReport.setStatusMessage("Export completed with file failures and Gmail label-update failures.");
         }
 
         return workflowReport;
@@ -185,9 +191,7 @@ public class EmailExportService {
         workflowReport.setDuration(
                 (int) java.time.Duration.between(
                         workflowReport.getStartTime(),
-                        workflowReport.getEndTime()
-                ).toSeconds()
-        );
+                        workflowReport.getEndTime()).toSeconds());
     }
 
     private EmailMessage cleanEmailBody(EmailMessage email) {
@@ -198,7 +202,6 @@ public class EmailExportService {
                 email.getSubject(),
                 email.getFrom(),
                 cleanedBody,
-                email.getReceivedDate()
-        );
+                email.getReceivedDate());
     }
 }

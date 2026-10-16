@@ -65,10 +65,10 @@ public class EmailBodyExtractorService {
 
                 }
             }
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
 
             System.out.println("Error extracting email body: " + e.getMessage());
-            return "";
+            throw new IllegalArgumentException("Failed to decode email body", e);
             
         }
 
