@@ -15,6 +15,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.example.email_automation.model.WorkflowReport;
@@ -289,4 +290,74 @@ class EmailSendServiceTest {
         verify(zipExportService, never()).createZipEmail(anyString());
         verify(gmailService, never()).sendZipFile(any());
     }
+
+    @Test
+    void shouldNotProcessNullFormat() {
+
+        ZipExportService zipExportService = mock(ZipExportService.class);
+        GmailService gmailService = mock(GmailService.class);
+        ArchiveService archiveService = mock(ArchiveService.class);
+
+        EmailSendService emailSendService = new EmailSendService(
+                zipExportService,
+                gmailService,
+                archiveService);
+
+        WorkflowReport result = emailSendService.processSend(null);
+
+        assertFalse(result.isWorkflowCompleted());
+        assertFalse(result.isEmailSent());
+        assertFalse(result.isZipCreated());
+
+        assertEquals(
+                "Unsupported export format. Supported formats: text, word.",
+                result.getStatusMessage());
+
+        verifyNoInteractions(
+                archiveService,
+                zipExportService,
+                gmailService);
+    }
+
+    @Test
+    void shouldNormalizeUppercaseFormat() throws Exception {
+
+        ZipExportService zipExportService = mock(ZipExportService.class);
+        GmailService gmailService = mock(GmailService.class);
+        ArchiveService archiveService = mock(ArchiveService.class);
+
+        EmailSendService emailSendService = new EmailSendService(
+                zipExportService,
+                gmailService,
+                archiveService);
+
+        Path zipFile = Path.of("ready_to_send/job_batch_test.zip");
+
+        when(archiveService.archiveDuplicateFiles("word"))
+                .thenReturn(0);
+
+        when(archiveService.getProcessedFileGmailIds("word"))
+                .thenReturn(List.of("gmail123"));
+
+        when(zipExportService.createZipEmail("word"))
+                .thenReturn(zipFile);
+
+        when(gmailService.sendZipFile(zipFile))
+                .thenReturn(true);
+
+        when(archiveService.archiveFiles("word"))
+                .thenReturn(1);
+
+        WorkflowReport result = emailSendService.processSend("WORD");
+
+        assertTrue(result.isWorkflowCompleted());
+        assertTrue(result.isEmailSent());
+        assertEquals("word", result.getFormat());
+
+        verify(archiveService).archiveDuplicateFiles("word");
+        verify(zipExportService).createZipEmail("word");
+        verify(archiveService).archiveFiles("word");
+        verify(zipExportService).archiveZipFile(zipFile);
+    }
+
 }

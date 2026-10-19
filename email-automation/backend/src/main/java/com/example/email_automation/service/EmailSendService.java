@@ -3,6 +3,7 @@ package com.example.email_automation.service;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,23 @@ public class EmailSendService {
         WorkflowReport result = new WorkflowReport();
         result.setFormat(format);
         result.setStartTime(LocalDateTime.now());
+
+        if (format == null ||
+                (!format.equalsIgnoreCase("text") &&
+                        !format.equalsIgnoreCase("word"))) {
+
+            logger.warn("Unsupported export format: {}", format);
+
+            result.setStatusMessage(
+                    "Unsupported export format. Supported formats: text, word.");
+
+            completeWorkflowReport(result);
+
+            return result;
+        }
+
+        format = format.toLowerCase(Locale.ROOT);
+        result.setFormat(format);
 
         int duplicatesArchived = archiveService.archiveDuplicateFiles(format);
 
