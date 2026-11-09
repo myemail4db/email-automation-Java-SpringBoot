@@ -6,6 +6,10 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![API](https://img.shields.io/badge/API-Gmail-red)
 
+**[Explore the Documentation Website](https://myemail4db.github.io/email-automation-Java-SpringBoot/)** | [Source Code](https://github.com/myemail4db/email-automation-Java-SpringBoot) | [API Reference](https://myemail4db.github.io/email-automation-Java-SpringBoot/pages/api.html) | [Setup Guide](https://myemail4db.github.io/email-automation-Java-SpringBoot/pages/setup.html)
+
+> **New to the project?** Start with the [documentation website](https://myemail4db.github.io/email-automation-Java-SpringBoot/). It provides a guided overview before linking to the architecture, engineering decisions, workflow, API, and implementation details.
+
 ## Table of Contents
 
 - [Email Automation - Java Spring Boot](#email-automation---java-spring-boot)
@@ -44,32 +48,22 @@ The Java project is maintained as an independent application with its own archit
 
 ## Project Documentation
 
-A documentation website is included with the project for a more detailed walkthrough of the application.
+**[Open the Email Automation Documentation Website](https://myemail4db.github.io/email-automation-Java-SpringBoot/)**
 
-It covers:
+The website is the recommended starting point for recruiters, hiring managers, technical leads, and developers. It presents the project in manageable sections so readers can understand the business purpose first, then explore the technical detail they need.
 
-* project background and evolution from the original Python implementation
-* application architecture
-* end-to-end workflow
-* engineering and implementation decisions
-* REST API endpoints
-* setup and local execution
-* current development status
-* project roadmap
+The website covers:
 
-The documentation website starts at:
+* Project background and evolution from the original Python implementation
+* Application architecture and end-to-end workflow
+* Engineering and implementation decisions, including reasoning and tradeoffs
+* REST API endpoints and configuration
+* Setup and local execution
+* Current implementation status and future roadmap
 
-```text
-docs/index.html
-```
+For a deeper technical review, readers can follow links to the source code, automated tests, and original Markdown documentation. The website's entry point is [`docs/index.html`](docs/index.html), and the original Markdown source material is preserved in [`docs/assets/source/`](docs/assets/source/).
 
-When published through GitHub Pages, the same documentation can be viewed as a website directly from the repository's GitHub Pages URL.
-
-The original Markdown documentation used as source material for the website is preserved under:
-
-```text
-docs/assets/source/
-```
+**Note:** GitHub displays HTML files as repository content. Use the website link above to view the rendered documentation through GitHub Pages.
 
 ---
 
@@ -140,7 +134,7 @@ The workflow intentionally pauses after export so the user can review and modify
 
 * Command-line interface using the existing service layer
 
-See the documentation website's **Current Status** page or [`docs/assets/source/06-current-status.md`](docs/assets/source/06-current-status.md) for additional implementation details.
+See the [documentation website's Current Status page](https://myemail4db.github.io/email-automation-Java-SpringBoot/pages/status.html) or [`docs/assets/source/06-current-status.md`](docs/assets/source/06-current-status.md) for additional implementation details.
 
 ---
 
@@ -158,8 +152,8 @@ See the documentation website's **Current Status** page or [`docs/assets/source/
 ### Clone the Repository
 
 ```bash
-git clone <repository-url>
-cd email-automation/backend
+git clone https://github.com/myemail4db/email-automation-Java-SpringBoot.git
+cd email-automation-Java-SpringBoot/email-automation/backend
 ```
 
 ### Build the Application
@@ -211,7 +205,7 @@ email.files.error-dir=error
 
 OAuth credentials and tokens contain sensitive information and should never be committed to the repository.
 
-See the documentation website's **Setup & Run** page for additional configuration information.
+See the [documentation website's Setup & Run page](https://myemail4db.github.io/email-automation-Java-SpringBoot/pages/setup.html) for additional configuration information.
 
 ---
 
@@ -241,7 +235,7 @@ GET /api/send?format=text
 GET /api/send?format=word
 ```
 
-See the documentation website's **API** page or [`docs/assets/source/04-api-endpoints.md`](docs/assets/source/04-api-endpoints.md) for the current API reference.
+See the [documentation website's API page](https://myemail4db.github.io/email-automation-Java-SpringBoot/pages/api.html) or [`docs/assets/source/04-api-endpoints.md`](docs/assets/source/04-api-endpoints.md) for the current API reference.
 
 ---
 
@@ -262,13 +256,13 @@ Possible later enhancements include:
 
 These are future possibilities and are not part of the current completed implementation.
 
-See the documentation website's **Roadmap** page or [`docs/assets/source/07-roadmap.md`](docs/assets/source/07-roadmap.md) for planned development.
+See the [documentation website's Roadmap page](https://myemail4db.github.io/email-automation-Java-SpringBoot/pages/roadmap.html) or [`docs/assets/source/07-roadmap.md`](docs/assets/source/07-roadmap.md) for planned development.
 
 ---
 
 ## Documentation Source
 
-The portfolio documentation website is maintained under `docs/`.
+The portfolio documentation website is maintained in the repository-root [`docs/`](docs/) directory and published through GitHub Pages. The website is the preferred reading experience; the Markdown files remain available for detailed review.
 
 ```text
 docs/
